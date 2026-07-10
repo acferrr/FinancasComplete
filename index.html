@@ -815,7 +815,57 @@ document.getElementById('loginPass').addEventListener('keydown',e=>{if(e.key==='
 async function afterLogin(){const{data:{user}}=await sb.auth.getUser();currentUser=user;document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';document.getElementById('loadingOverlay').style.display='none';loadLocalPrefs();loadAIConfig();await loadAllData();render()}
 async function doLogout(){if(sb)await sb.auth.signOut();currentUser=null;document.getElementById('app').style.display='none';showLoginScreen()}
 function showLoginScreen(){document.getElementById('loginScreen').style.display='flex';document.getElementById('loadingOverlay').style.display='none'}
-async function checkSession(){if(!initSupabase()){document.getElementById('configBanner').style.display='block';document.getElementById('loadingOverlay').style.display='none';document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';const cfg=getSbConfig();document.getElementById('sbUrl').value=cfg.url;document.getElementById('sbKey').value=cfg.key;loadLocalPrefs();loadAIConfig();render();showPage('settings',null);return}const cfg=getSbConfig();document.getElementById('sbUrl').value=cfg.url;document.getElementById('sbKey').value=cfg.key;const{data:{session}}=await sb.auth.getSession();if(session){currentUser=session.user;await afterLogin()}else{document.getElementById('loadingOverlay').style.display='none';showLoginScreen()}}
+async function checkSession(){
+  // Always hide loading first after a short delay to prevent infinite spinner
+  const hideLoading = () => {
+    document.getElementById('loadingOverlay').style.display='none';
+  };
+  // Safety timeout — if anything hangs, show config after 4s
+  const safetyTimer = setTimeout(() => {
+    hideLoading();
+    document.getElementById('configBanner').style.display='block';
+    document.getElementById('app').style.display='block';
+    showPage('settings',null);
+  }, 4000);
+
+  try {
+    if(!initSupabase()){
+      clearTimeout(safetyTimer);
+      hideLoading();
+      document.getElementById('configBanner').style.display='block';
+      document.getElementById('loginScreen').style.display='none';
+      document.getElementById('app').style.display='block';
+      const cfg=getSbConfig();
+      const sbUrlEl=document.getElementById('sbUrl');
+      const sbKeyEl=document.getElementById('sbKey');
+      if(sbUrlEl)sbUrlEl.value=cfg.url;
+      if(sbKeyEl)sbKeyEl.value=cfg.key;
+      loadLocalPrefs();loadAIConfig();render();showPage('settings',null);
+      return;
+    }
+    const cfg=getSbConfig();
+    const sbUrlEl=document.getElementById('sbUrl');
+    const sbKeyEl=document.getElementById('sbKey');
+    if(sbUrlEl)sbUrlEl.value=cfg.url;
+    if(sbKeyEl)sbKeyEl.value=cfg.key;
+    const{data:{session},error}=await sb.auth.getSession();
+    clearTimeout(safetyTimer);
+    if(error||!session){
+      hideLoading();
+      showLoginScreen();
+    } else {
+      currentUser=session.user;
+      await afterLogin();
+    }
+  } catch(e) {
+    clearTimeout(safetyTimer);
+    console.error('Session check failed:',e);
+    hideLoading();
+    document.getElementById('configBanner').style.display='block';
+    document.getElementById('app').style.display='block';
+    showPage('settings',null);
+  }
+}
 
 // SYNC
 function setSyncStatus(s,t){const dot=document.getElementById('syncDot'),txt=document.getElementById('syncText');if(!dot)return;dot.className='sync-dot'+(s==='syncing'?' syncing':s==='error'?' error':'');txt.textContent=t||'Sync'}
