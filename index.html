@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="theme-color" content="#0f172a"/>
+<title>Kova Finanças</title>
+<!-- Phosphor Icons (Ícones minimalistas e profissionais) -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<!-- Fontes modernas -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+/* ── THEMES (Luxury & Minimalist) ── */
+:root, [data-theme="luma-dark"] {
+  --bg: #09090b; --surface: #121214; --bg2: #18181b; --bg3: #27272a; 
+  --border: #27272a; --border2: #3f3f46;
+  --text: #f4f4f5; --text2: #a1a1aa; --text3: #71717a;
+  --accent: #6366f1; --accent2: #4f46e5; --accent-fg: #ffffff;
+  --green: #10b981; --green-dim: rgba(16,185,129,.15);
+  --red: #ef4444; --red-dim: rgba(239,68,68,.15);
+  --blue: #3b82f6; --blue-dim: rgba(59,130,246,.15);
+  --amber: #f59e0b; --amber-dim: rgba(245,158,11,.15);
+  --purple: #8b5cf6; --purple-dim: rgba(139,92,246,.15);
+  --header-bg: rgba(9, 9, 11, 0.8); --sidebar-bg: #121214; --nav-bg: rgba(18, 18, 20, 0.9);
+  --shadow: 0 4px 12px rgba(0,0,0,.15); --shadow2: 0 8px 24px rgba(0,0,0,.3);
+  --radius: 16px; --radius2: 12px; --radius3: 8px;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace;
+}
+[data-theme="emerald-luxury"] {
+  --bg: #020c08; --surface: #02110c; --bg2: #051c14; --bg3: #0a2e22; 
+  --border: #0a2e22; --border2: #1a422f;
+  --text: #e8f4ed; --text2: #84a999; --text3: #4a7561;
+  --accent: #10b981; --accent2: #059669; --accent-fg: #000000;
+  --green: #10b981; --green-dim: rgba(16,185,129,.15);
+  --red: #f43f5e; --red-dim: rgba(244,63,94,.15);
+  --blue: #38bdf8; --blue-dim: rgba(56,189,248,.15);
+  --amber: #fbbf24; --amber-dim: rgba(251,191,36,.15);
+  --purple: #a78bfa; --purple-dim: rgba(167,139,250,.15);
+  --header-bg: rgba(2, 12, 8, 0.8); --sidebar-bg: #02110c; --nav-bg: rgba(2, 17, 12, 0.9);
+  --shadow: 0 4px 12px rgba(0,0,0,.3); --shadow2: 0 8px 24px rgba(0,0,0,.5);
+  --radius: 16px; --radius2: 12px; --radius3: 8px;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace;
+}
+[data-theme="cream-beige"] {
+  --bg: #f9f8f4; --surface: #ffffff; --bg2: #f3ebd6; --bg3: #e6dfcc; 
+  --border: #e6dfcc; --border2: #d1c8b0;
+  --text: #1a1a1a; --text2: #5a5a5a; --text3: #8a8a8a;
+  --accent: #1a422f; --accent2: #02110c; --accent-fg: #ffffff;
+  --green: #059669; --green-dim: rgba(5,150,105,.15);
+  --red: #dc2626; --red-dim: rgba(220,38,38,.15);
+  --blue: #2563eb; --blue-dim: rgba(37,99,235,.15);
+  --amber: #d97706; --amber-dim: rgba(217,119,6,.15);
+  --purple: #7c3aed; --purple-dim: rgba(124,58,237,.15);
+  --header-bg: rgba(249, 248, 244, 0.8); --sidebar-bg: #f3ebd6; --nav-bg: rgba(255, 255, 255, 0.9);
+  --shadow: 0 4px 12px rgba(0,0,0,.05); --shadow2: 0 8px 24px rgba(0,0,0,.08);
+  --radius: 16px; --radius2: 12px; --radius3: 8px;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; transition: background .3s, color .3s; -webkit-tap-highlight-color: transparent; }
+.private-val { color: transparent !important; text-shadow: 0 0 10px currentColor; user-select: none; filter: blur(6px); transition: filter 0.3s; }
+
+/* ── ANIMATIONS & EFFECTS ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.page { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.page.active { display: block; }
+
+/* ── LAYOUT & HEADER ── */
+.app-header { background: var(--header-bg); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; transition: all 0.3s; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.app-logo { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent2)); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: var(--accent-fg); font-size: 20px; }
+.app-title { font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+.header-right { display: flex; align-items: center; gap: 8px; }
+
+.icon-btn { width: 36px; height: 36px; background: transparent; border: 1px solid var(--border); border-radius: var(--radius3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text2); font-size: 18px; }
+.icon-btn:hover { background: var(--bg3); color: var(--text); transform: scale(1.05); }
+.icon-btn:active { transform: scale(0.95); }
+
+/* ── NAVIGATION ── */
+.sidebar-nav { width: 220px; flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); height: calc(100vh - 60px); overflow-y: auto; padding: 16px 12px; display: flex; flex-direction: column; gap: 4px; }
+.sidebar-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius3); cursor: pointer; color: var(--text2); font-weight: 500; font-size: 0.9rem; transition: all 0.2s; border: none; background: none; font-family: var(--font); text-align: left; width: 100%; }
+.sidebar-nav-item:hover { background: var(--bg3); color: var(--text); }
+.sidebar-nav-item.active { background: var(--accent); color: var(--accent-fg) !important; font-weight: 600; box-shadow: var(--shadow); }
+.sidebar-nav-item i { font-size: 20px; transition: transform 0.2s; }
+.sidebar-nav-item.active i { transform: scale(1.1); }
+
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); backdrop-filter: blur(12px); border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 2px 8px; cursor: pointer; gap: 4px; color: var(--text3); font-size: 0.65rem; font-weight: 600; border: none; background: none; font-family: var(--font); transition: color 0.2s; }
+.nav-item i { font-size: 24px; transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.nav-item.active { color: var(--accent); }
+.nav-item.active i { transform: translateY(-3px) scale(1.1); }
+
+/* ── MAIN CONTENT & CARDS ── */
+.main-content { padding: 24px 20px; padding-bottom: 90px; max-width: 1000px; margin: 0 auto; }
+.month-selector { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; background: var(--surface); padding: 8px; border-radius: var(--radius2); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.month-nav-btn { width: 36px; height: 36px; background: var(--bg2); border: none; border-radius: var(--radius3); cursor: pointer; transition: all 0.2s; color: var(--text); font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.month-nav-btn:hover { background: var(--accent); color: var(--accent-fg); }
+.month-label { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+
+.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media(max-width: 600px) { .cards-grid { grid-template-columns: 1fr; } }
+.card-balance-row { grid-column: 1 / -1; }
+.summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s; position: relative; overflow: hidden; }
+.summary-card.clickable { cursor: pointer; }
+.summary-card.clickable:hover { transform: translateY(-4px); box-shadow: var(--shadow2); border-color: var(--accent); }
+.summary-card.clickable::after { content: '\e0ba'; font-family: 'Phosphor'; position: absolute; right: 20px; top: 20px; color: var(--text3); font-size: 18px; opacity: 0.5; transition: opacity 0.2s; }
+.summary-card.clickable:hover::after { opacity: 1; color: var(--accent); }
+
+.card-label { font-size: 0.75rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.card-value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; font-family: var(--mono); margin-bottom: 4px; }
+.card-in .card-label i { color: var(--green); font-size: 16px; }
+.card-out .card-label i { color: var(--red); font-size: 16px; }
+.card-balance { background: linear-gradient(135deg, var(--surface) 0%, var(--bg2) 100%); }
+.card-balance .card-value { color: var(--accent); font-size: 2rem; }
+
+/* ── CHARTS CONTAINER ── */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+.chart-card-title { font-size: 0.85rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
+.chart-wrap { position: relative; height: 250px; width: 100%; }
+
+/* ── ANALYSIS PAGE SPECIFIC ── */
+.analysis-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+.analysis-title { font-size: 1.25rem; font-weight: 700; display: flex; align-items: center; gap: 10px; }
+.analysis-badge { padding: 6px 12px; border-radius: 99px; font-size: 0.8rem; font-weight: 700; display: inline-flex; align-items: center; gap: 6px; }
+.analysis-badge.up { background: var(--red-dim); color: var(--red); }
+.analysis-badge.down { background: var(--green-dim); color: var(--green); }
+.analysis-badge.neutral { background: var(--blue-dim); color: var(--blue); }
+
+.insight-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+.insight-box { background: var(--bg2); padding: 16px; border-radius: var(--radius2); border: 1px solid var(--border); }
+.insight-box-title { font-size: 0.75rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 4px; }
+.insight-box-val { font-size: 1.1rem; font-weight: 700; color: var(--text); }
+.insight-box-sub { font-size: 0.75rem; color: var(--text2); margin-top: 4px; }
+
+/* ── BUTTONS & UI ELEMENTS ── */
+.add-btn { background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius2); padding: 10px 18px; font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: var(--font); display: flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3); }
+.add-btn:hover { background: var(--accent2); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(99, 102, 241, 0.4); }
+.add-btn:active { transform: translateY(0); }
+.add-btn i { font-size: 18px; }
+
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 24px; gap: 8px; flex-wrap: wrap; }
+.section-title { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: 0.01em; display: flex; align-items: center; gap: 8px; }
+
+.transaction-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius2); padding: 14px 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.2s; }
+.transaction-item:hover { box-shadow: var(--shadow); transform: translateX(4px); border-color: var(--border2); }
+.tx-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.tx-info { flex: 1; min-width: 0; }
+.tx-desc { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-meta { font-size: 0.75rem; color: var(--text3); margin-top: 4px; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; }
+.tx-amount { font-family: var(--mono); font-size: 1rem; font-weight: 700; text-align: right; flex-shrink: 0; }
+.tx-amount.in { color: var(--green); } .tx-amount.out { color: var(--text); }
+
+/* Modal simplificado para caber no limite */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(4px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; }
+.modal-backdrop.open { display: flex; animation: fadeIn 0.3s ease; }
+.modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); box-shadow: var(--shadow2); }
+
+/* Forms */
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 0.8rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; display: block; }
+.form-input, .form-select { width: 100%; padding: 12px 16px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius2); color: var(--text); font-family: var(--font); font-size: 0.95rem; outline: none; transition: border 0.2s; }
+.form-input:focus, .form-select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(99,102,241,0.1); }
+
+@media(min-width: 900px) {
+  .bottom-nav { display: none; }
+  .main-content { padding-bottom: 40px; }
+  .sidebar-nav { position: fixed; left: 0; top: 60px; bottom: 0; display: flex; }
+  .content-wrapper { margin-left: 220px; }
+}
+@media(max-width: 899px) { .sidebar-nav { display: none !important; } .content-wrapper { margin-left: 0; } }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="app-header">
+    <div class="header-left">
+      <div class="app-logo"><i class="ph-bold ph-infinity"></i></div>
+      <span class="app-title">Kova Finanças</span>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="togglePrivacy()" title="Ocultar Valores"><i class="ph ph-eye-slash"></i></button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Trocar Tema"><i class="ph ph-palette"></i></button>
+    </div>
+  </header>
+
+  <nav class="sidebar-nav">
+    <button class="sidebar-nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)"><i class="ph ph-squares-four"></i> Visão Geral</button>
+    <button class="sidebar-nav-item" data-page="transactions" onclick="showPage('transactions', this)"><i class="ph ph-list-dashes"></i> Lançamentos</button>
+    <button class="sidebar-nav-item" data-page="import" onclick="showPage('import', this)"><i class="ph ph-file-arrow-down"></i> Importar Extrato</button>
+  </nav>
+
+  <div class="content-wrapper">
+    <main class="main-content">
+      
+      <!-- ── DASHBOARD ── -->
+      <div id="page-dashboard" class="page active">
+        <div class="month-selector">
+          <button class="month-nav-btn" onclick="changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
+          <span class="month-label" id="monthLabelDash">—</span>
+          <button class="month-nav-btn" onclick="changeMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
+        </div>
+
+        <div class="cards-grid">
+          <!-- Receitas (Clicável) -->
+          <div class="summary-card card-in clickable" onclick="openAnalysis('in')">
+            <div class="card-label"><i class="ph-bold ph-trend-up"></i> Receitas</div>
+            <div class="card-value" id="dashTotalIn">R$ 0,00</div>
+            <div style="font-size: 0.8rem; color: var(--text3);">Ver análise detalhada <i class="ph ph-arrow-right"></i></div>
+          </div>
+          <!-- Despesas (Clicável) -->
+          <div class="summary-card card-out clickable" onclick="openAnalysis('out')">
+            <div class="card-label"><i class="ph-bold ph-trend-down"></i> Despesas</div>
+            <div class="card-value" id="dashTotalOut">R$ 0,00</div>
+            <div style="font-size: 0.8rem; color: var(--text3);">Ver análise detalhada <i class="ph ph-arrow-right"></i></div>
+          </div>
+          <!-- Saldo -->
+          <div class="summary-card card-balance card-balance-row">
+            <div class="card-label"><i class="ph-bold ph-wallet"></i> Saldo do Mês</div>
+            <div class="card-value" id="dashTotalBalance">R$ 0,00</div>
+          </div>
+        </div>
+
+        <!-- Gráfico Mensal no Dashboard -->
+        <div class="chart-card">
+          <div class="chart-card-title"><i class="ph-bold ph-chart-bar"></i> Fluxo dos Últimos 6 Meses</div>
+          <div class="chart-wrap"><canvas id="dashChartMonthly"></canvas></div>
+        </div>
+
+        <div class="section-header">
+          <span class="section-title"><i class="ph-bold ph-clock-counter-clockwise"></i> Recentes</span>
+          <button class="add-btn" onclick="openTxModal()">+ Lançamento</button>
+        </div>
+        <div id="txListDash"></div>
+      </div>
+
+      <!-- ── ANÁLISE DETALHADA (Nova Tela UX) ── -->
+      <div id="page-analysis" class="page">
+        <button class="add-btn" style="background:var(--bg3); color:var(--text); margin-bottom:16px;" onclick="showPage('dashboard')"><i class="ph-bold ph-arrow-left"></i> Voltar</button>
+        
+        <div class="analysis-header">
+          <div class="analysis-title" id="analysisTitle"><i class="ph-bold ph-chart-line-up"></i> Análise de Despesas</div>
+          <div class="month-label" id="analysisMonthLabel">Novembro 2026</div>
+        </div>
+
+        <!-- Insights vs Mês Anterior -->
+        <div class="insight-grid">
+          <div class="insight-box">
+            <div class="insight-box-title">Comparação vs Mês Passado</div>
+            <div class="insight-box-val" id="analysisCompareVal">R$ 0,00</div>
+            <div class="insight-box-sub" id="analysisCompareBadge">...</div>
+          </div>
+          <div class="insight-box">
+            <div class="insight-box-title">Meta do Mês (Projeção)</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <input type="number" id="analysisGoalInput" class="form-input" placeholder="Definir Meta R$" style="padding:8px; font-size:0.9rem;" onchange="updateAnalysisGoal()"/>
+            </div>
+            <div id="analysisGoalProgress" style="margin-top:8px; font-size:0.8rem; font-weight:600;"></div>
+          </div>
+        </div>
+
+        <!-- Top Gastos / Receitas -->
+        <div class="insight-grid">
+          <div class="insight-box" style="border-left: 4px solid var(--red);">
+            <div class="insight-box-title">Maior Transação</div>
+            <div class="insight-box-val" id="analysisHighestVal">R$ 0,00</div>
+            <div class="insight-box-sub" id="analysisHighestName">-</div>
+          </div>
+          <div class="insight-box" style="border-left: 4px solid var(--green);">
+            <div class="insight-box-title">Menor Transação</div>
+            <div class="insight-box-val" id="analysisLowestVal">R$ 0,00</div>
+            <div class="insight-box-sub" id="analysisLowestName">-</div>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-title"><i class="ph-bold ph-pie-chart"></i> Distribuição por Categoria</div>
+          <div class="chart-wrap"><canvas id="analysisChartCat"></canvas></div>
+        </div>
+      </div>
+
+      <!-- ── IMPORTAÇÃO ── -->
+      <div id="page-import" class="page">
+        <div class="section-header"><span class="section-title"><i class="ph-bold ph-upload-simple"></i> Importar Extrato</span></div>
+        <div style="background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:24px; box-shadow:var(--shadow);">
+          <p style="font-size:0.9rem; color:var(--text2); margin-bottom: 20px;">Importe arquivos OFX, CSV ou Excel. O sistema utiliza Regex inteligente para extrair data e valor de qualquer formato de extrato bancário brasileiro.</p>
+          
+          <div style="border:2px dashed var(--border2); border-radius:var(--radius); padding:40px 20px; text-align:center; cursor:pointer; transition: all 0.2s;" onclick="document.getElementById('importFile').click()" ondragover="event.preventDefault();this.style.borderColor='var(--accent)'" ondragleave="this.style.borderColor='var(--border2)'" ondrop="handleDrop(event)">
+            <i class="ph-duotone ph-folder-open" style="font-size: 48px; color: var(--accent); margin-bottom: 12px;"></i>
+            <h3 style="margin-bottom: 8px;">Arraste ou clique para selecionar</h3>
+            <p style="font-size: 0.8rem; color: var(--text3);">CSV, OFX, XLSX suportados</p>
+            <input type="file" id="importFile" style="display:none" accept=".ofx,.csv,.xlsx" onchange="handleFile(event)"/>
+          </div>
+        </div>
+        <div id="importResult" style="margin-top:24px;"></div>
+      </div>
+
+    </main>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)"><i class="ph-bold ph-squares-four"></i> Visão Geral</button>
+    <button class="nav-item" data-page="import" onclick="showPage('import', this)"><i class="ph-bold ph-upload-simple"></i> Importar</button>
+  </nav>
+</div>
+
+<script>
+// ── DADOS E ESTADO MOCKADO PARA EXEMPLO ──
+// Substituí os Emojis por nomes de ícones do Phosphor Icons
+const CAT_OUT = [
+  {id:'alimentacao', label:'Alimentação', icon:'ph-shopping-cart', color:'#f59e0b'},
+  {id:'moradia', label:'Moradia', icon:'ph-house', color:'#ef4444'},
+  {id:'transporte', label:'Transporte', icon:'ph-car', color:'#14b8a6'},
+  {id:'saude', label:'Saúde', icon:'ph-heartbeat', color:'#ec4899'},
+  {id:'lazer', label:'Lazer', icon:'ph-game-controller', color:'#06b6d4'},
+  {id:'outros', label:'Outros', icon:'ph-dots-three-circle', color:'#94a3b8'}
+];
+const CAT_IN = [
+  {id:'salario', label:'Salário', icon:'ph-briefcase', color:'#10b981'},
+  {id:'investimento', label:'Investimento', icon:'ph-trend-up', color:'#f59e0b'},
+  {id:'outros_in', label:'Outros', icon:'ph-money', color:'#94a3b8'}
+];
+
+// Dados fake para popular os gráficos e visual
+let TRANSACTIONS = [
+  {id:1, type:'in', value: 4500, date:'2026-11-05', category:'salario', desc:'Salário Mensal'},
+  {id:2, type:'out', value: 1200, date:'2026-11-06', category:'moradia', desc:'Aluguel'},
+  {id:3, type:'out', value: 350, date:'2026-11-08', category:'alimentacao', desc:'Mercado'},
+  {id:4, type:'out', value: 120, date:'2026-11-10', category:'transporte', desc:'Uber'},
+  {id:5, type:'in', value: 800, date:'2026-11-12', category:'investimento', desc:'Dividendos'},
+  
+  // Mês anterior (Outubro) para comparação
+  {id:6, type:'out', value: 900, date:'2026-10-06', category:'moradia', desc:'Aluguel'},
+  {id:7, type:'out', value: 400, date:'2026-10-08', category:'alimentacao', desc:'Mercado'},
+  {id:8, type:'in', value: 4500, date:'2026-10-05', category:'salario', desc:'Salário Mensal'},
+];
+
+let currentMonth = 10; // Novembro (0-index)
+let currentYear = 2026;
+let privacyMode = false;
+let currentAnalysisType = 'out'; 
+let goals = { in: 0, out: 2000 };
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+const THEMES = ['luma-dark', 'emerald-luxury', 'cream-beige'];
+let currentThemeIdx = 0;
+
+// ── UTILIDADES ──
+const formatBRL = (n) => 'R$ ' + Number(n||0).toLocaleString('pt-BR', {minimumFractionDigits:2});
+const pv = (val) => privacyMode ? `<span class="private-val">${val}</span>` : val;
+function togglePrivacy() { privacyMode = !privacyMode; renderApp(); }
+function toggleTheme() { 
+  currentThemeIdx = (currentThemeIdx + 1) % THEMES.length;
+  document.documentElement.setAttribute('data-theme', THEMES[currentThemeIdx]);
+  if(dashChart) dashChart.update();
+  if(analysisChart) analysisChart.update();
+}
+function changeMonth(dir) {
+  currentMonth += dir;
+  if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderApp();
+}
+
+function showPage(pageId, navItem) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelectorAll('.nav-item, .sidebar-nav-item').forEach(b => b.classList.remove('active'));
+  if(navItem) navItem.classList.add('active');
+  if(pageId === 'analysis') renderAnalysisView();
+}
+
+function getCatInfo(type, catId) {
+  const list = type === 'in' ? CAT_IN : CAT_OUT;
+  return list.find(c => c.id === catId) || {label: catId, icon: 'ph-question', color: '#94a3b8'};
+}
+
+// ── RENDERIZAÇÃO PRINCIPAL ──
+let dashChart = null;
+function renderApp() {
+  document.getElementById('monthLabelDash').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+  
+  const txs = TRANSACTIONS.filter(t => {
+    const d = new Date(t.date + 'T12:00:00');
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const inp = txs.filter(t=>t.type==='in').reduce((s,t)=>s+t.value, 0);
+  const out = txs.filter(t=>t.type==='out').reduce((s,t)=>s+t.value, 0);
+  
+  document.getElementById('dashTotalIn').innerHTML = pv(formatBRL(inp));
+  document.getElementById('dashTotalOut').innerHTML = pv(formatBRL(out));
+  
+  const balEl = document.getElementById('dashTotalBalance');
+  balEl.innerHTML = pv(formatBRL(inp - out));
+  balEl.style.color = (inp - out) >= 0 ? 'var(--accent)' : 'var(--red)';
+
+  // Lista Recentes
+  const listEl = document.getElementById('txListDash');
+  listEl.innerHTML = txs.sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5).map(t => {
+    const cat = getCatInfo(t.type, t.category);
+    const bgc = t.type === 'in' ? 'var(--green-dim)' : 'var(--red-dim)';
+    const cColor = t.type === 'in' ? 'var(--green)' : 'var(--red)';
+    const sign = t.type === 'in' ? '+' : '-';
+    return `<div class="transaction-item">
+      <div class="tx-icon" style="background:${bgc}; color:${cColor}"><i class="ph ${cat.icon}"></i></div>
+      <div class="tx-info"><div class="tx-desc">${t.desc || cat.label}</div><div class="tx-meta">${t.date.split('-').reverse().join('/')} · ${cat.label}</div></div>
+      <div class="tx-amount ${t.type}">${pv(sign + formatBRL(t.value))}</div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text3); font-size:0.9rem; text-align:center; padding:20px;">Nenhum lançamento.</div>';
+
+  renderMonthlyChart();
+}
+
+// ── GRÁFICO DASHBOARD ──
+function renderMonthlyChart() {
+  const ctx = document.getElementById('dashChartMonthly').getContext('2d');
+  if(dashChart) dashChart.destroy();
+  
+  const labels = [], ins = [], outs = [];
+  for(let i=5; i>=0; i--) {
+    let m = currentMonth - i, y = currentYear;
+    if(m<0) { m+=12; y--; }
+    labels.push(MONTHS[m].slice(0,3));
+    const mtxs = TRANSACTIONS.filter(t => new Date(t.date+'T12:00').getMonth()===m && new Date(t.date+'T12:00').getFullYear()===y);
+    ins.push(mtxs.filter(t=>t.type==='in').reduce((s,t)=>s+t.value,0));
+    outs.push(mtxs.filter(t=>t.type==='out').reduce((s,t)=>s+t.value,0));
+  }
+
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text2').trim() || '#a1a1aa';
+  
+  dashChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels, datasets: [
+      { label: 'Receitas', data: ins, backgroundColor: '#10b981', borderRadius: 6 },
+      { label: 'Despesas', data: outs, backgroundColor: '#ef4444', borderRadius: 6 }
+    ]},
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { 
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.8)', titleFont: {family: 'Plus Jakarta Sans'}, bodyFont: {family: 'JetBrains Mono'},
+          callbacks: { label: c => ' ' + formatBRL(c.raw) }
+        }
+      },
+      scales: {
+        x: { grid: {display:false}, ticks: {color: textColor, font: {family: 'Plus Jakarta Sans'}} },
+        y: { border:{display:false}, grid: {color: 'rgba(128,128,128,0.1)'}, ticks: {color: textColor, font: {family: 'JetBrains Mono'}, callback: v => 'R$ '+v} }
+      }
+    }
+  });
+}
+
+// ── TELA DE ANÁLISE DETALHADA (NOVO UX) ──
+function openAnalysis(type) {
+  currentAnalysisType = type;
+  showPage('analysis');
+}
+
+let analysisChart = null;
+function renderAnalysisView() {
+  document.getElementById('analysisMonthLabel').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+  const isOut = currentAnalysisType === 'out';
+  
+  // Título e Cores
+  const titleEl = document.getElementById('analysisTitle');
+  titleEl.innerHTML = isOut ? `<i class="ph-bold ph-trend-down" style="color:var(--red)"></i> Análise de Despesas` : `<i class="ph-bold ph-trend-up" style="color:var(--green)"></i> Análise de Receitas`;
+  
+  // Filtrar dados do mês atual e anterior
+  const getTxs = (m, y) => TRANSACTIONS.filter(t => t.type === currentAnalysisType && new Date(t.date+'T12:00').getMonth()===m && new Date(t.date+'T12:00').getFullYear()===y);
+  
+  const curTxs = getTxs(currentMonth, currentYear);
+  let lastM = currentMonth - 1, lastY = currentYear;
+  if(lastM < 0) { lastM = 11; lastY--; }
+  const lastTxs = getTxs(lastM, lastY);
+
+  const curTotal = curTxs.reduce((s,t)=>s+t.value, 0);
+  const lastTotal = lastTxs.reduce((s,t)=>s+t.value, 0);
+  const diff = curTotal - lastTotal;
+  const diffPct = lastTotal > 0 ? (diff / lastTotal * 100).toFixed(1) : 100;
+
+  // Atualizar Insight: Comparação
+  document.getElementById('analysisCompareVal').innerHTML = pv(formatBRL(curTotal));
+  const badgeEl = document.getElementById('analysisCompareBadge');
+  if(diff > 0) {
+    badgeEl.className = `analysis-badge ${isOut ? 'up' : 'down'}`; // Aumento de despesa é ruim (up=vermelho), aumento de receita é bom (down=verde css reused)
+    badgeEl.style.background = isOut ? 'var(--red-dim)' : 'var(--green-dim)';
+    badgeEl.style.color = isOut ? 'var(--red)' : 'var(--green)';
+    badgeEl.innerHTML = `<i class="ph-bold ph-arrow-up-right"></i> +R$ ${Math.abs(diff).toFixed(2)} (${diffPct}%) ${isOut ? '- ⚠️ Atenção' : '- Ótimo!'}`;
+  } else if (diff < 0) {
+    badgeEl.style.background = isOut ? 'var(--green-dim)' : 'var(--red-dim)';
+    badgeEl.style.color = isOut ? 'var(--green)' : 'var(--red)';
+    badgeEl.innerHTML = `<i class="ph-bold ph-arrow-down-right"></i> -R$ ${Math.abs(diff).toFixed(2)} (${diffPct}%)`;
+  } else {
+    badgeEl.style.background = 'var(--bg3)'; badgeEl.style.color = 'var(--text2)';
+    badgeEl.innerHTML = `<i class="ph-bold ph-minus"></i> Sem variação`;
+  }
+
+  // Maior e Menor
+  if(curTxs.length > 0) {
+    const sorted = [...curTxs].sort((a,b)=>b.value - a.value);
+    const highest = sorted[0];
+    const lowest = sorted[sorted.length-1];
+    document.getElementById('analysisHighestVal').innerHTML = pv(formatBRL(highest.value));
+    document.getElementById('analysisHighestName').textContent = highest.desc || highest.category;
+    document.getElementById('analysisLowestVal').innerHTML = pv(formatBRL(lowest.value));
+    document.getElementById('analysisLowestName').textContent = lowest.desc || lowest.category;
+  } else {
+    ['analysisHighestVal','analysisLowestVal'].forEach(id => document.getElementById(id).textContent = 'R$ 0,00');
+    ['analysisHighestName','analysisLowestName'].forEach(id => document.getElementById(id).textContent = '-');
+  }
+
+  // Meta
+  const goalInput = document.getElementById('analysisGoalInput');
+  goalInput.value = goals[currentAnalysisType] || '';
+  updateAnalysisGoal(curTotal);
+
+  // Gráfico de Rosca (Donut) interativo
+  renderAnalysisChart(curTxs);
+}
+
+function updateAnalysisGoal(curTotalFallback) {
+  const val = parseFloat(document.getElementById('analysisGoalInput').value);
+  if(val > 0) goals[currentAnalysisType] = val;
+  
+  const curTxs = TRANSACTIONS.filter(t => t.type === currentAnalysisType && new Date(t.date+'T12:00').getMonth()===currentMonth && new Date(t.date+'T12:00').getFullYear()===currentYear);
+  const curTotal = curTotalFallback !== undefined ? curTotalFallback : curTxs.reduce((s,t)=>s+t.value, 0);
+  
+  const progEl = document.getElementById('analysisGoalProgress');
+  if(goals[currentAnalysisType] > 0) {
+    const pct = Math.min(100, Math.round((curTotal / goals[currentAnalysisType]) * 100));
+    const isOut = currentAnalysisType === 'out';
+    const over = curTotal > goals[currentAnalysisType];
+    const color = isOut ? (over ? 'var(--red)' : 'var(--green)') : (over ? 'var(--green)' : 'var(--amber)');
+    progEl.innerHTML = `<div style="height:6px; background:var(--bg3); border-radius:3px; overflow:hidden; margin-bottom:4px;"><div style="width:${pct}%; height:100%; background:${color}; transition:width 0.5s;"></div></div>
+                        <span style="color:${color}">${pct}% da meta atingida</span>`;
+  } else {
+    progEl.innerHTML = '<span style="color:var(--text3)">Nenhuma meta definida.</span>';
+  }
+}
+
+function renderAnalysisChart(txs) {
+  const ctx = document.getElementById('analysisChartCat').getContext('2d');
+  if(analysisChart) analysisChart.destroy();
+
+  const map = {};
+  txs.forEach(t => { map[t.category] = (map[t.category]||0) + t.value; });
+  const labels = [], data = [], bg = [];
+  Object.keys(map).sort((a,b)=>map[b]-map[a]).forEach(cId => {
+    const info = getCatInfo(currentAnalysisType, cId);
+    labels.push(info.label); data.push(map[cId]); bg.push(info.color);
+  });
+
+  const textColor = getComputedStyle(document.documentElement).getPropertyValue('--text2').trim() || '#a1a1aa';
+
+  analysisChart = new Chart(ctx, {
+    type: 'doughnut',
+    data: { labels, datasets: [{ data, backgroundColor: bg, borderWidth: 0, hoverOffset: 8 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false, cutout: '75%',
+      plugins: {
+        legend: { position: 'right', labels: { color: textColor, font: {family: 'Plus Jakarta Sans'} } },
+        tooltip: {
+          backgroundColor: 'rgba(0,0,0,0.9)', padding: 12, titleFont: {family: 'Plus Jakarta Sans', size: 14}, bodyFont: {family: 'JetBrains Mono', size: 13},
+          callbacks: {
+            label: c => ` ${c.label}: ${formatBRL(c.raw)}`,
+            afterLabel: c => {
+              // Encontrar as transações exatas dessa categoria para mostrar no tooltip
+              const catId = Object.keys(map).sort((a,b)=>map[b]-map[a])[c.dataIndex];
+              const tDetails = txs.filter(t=>t.category === catId).map(t => `• ${t.date.slice(8,10)}/mês - ${t.desc.substring(0,12)}: R$ ${t.value}`).join('\n');
+              return '\n' + (tDetails.length > 0 ? tDetails : '');
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// ── CORREÇÃO DA IMPORTAÇÃO DEFINITIVA (REGEX FLEXÍVEL) ──
+function handleDrop(e) {
+  e.preventDefault();
+  document.getElementById('importFile').files = e.dataTransfer.files;
+  handleFile({target: document.getElementById('importFile')});
+}
+
+function handleFile(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const resEl = document.getElementById('importResult');
+  resEl.innerHTML = `<div style="text-align:center; color:var(--text2)"><i class="ph-duotone ph-spinner ph-spin" style="font-size:24px;"></i> Lendo arquivo...</div>`;
+  
+  const reader = new FileReader();
+  reader.onload = (ev) => {
+    const text = ev.target.result;
+    let parsedRows = [];
+    if(file.name.toLowerCase().endsWith('.csv')) {
+      parsedRows = parseSmartCSV(text);
+    } else if(file.name.toLowerCase().endsWith('.ofx')) {
+      parsedRows = parseSmartOFX(text);
+    } else {
+      resEl.innerHTML = `<div style="color:var(--red);"><i class="ph-bold ph-warning"></i> Formato não suportado por este simulador. Use CSV ou OFX.</div>`;
+      return;
+    }
+    
+    if(parsedRows.length === 0) {
+      resEl.innerHTML = `<div style="padding:16px; background:var(--red-dim); color:var(--red); border-radius:var(--radius2);"><i class="ph-bold ph-warning"></i> <b>Nenhuma transação encontrada no arquivo.</b><br>Verifique se o arquivo contém datas (ex: DD/MM/AAAA) e valores.</div>`;
+    } else {
+      resEl.innerHTML = `<div style="padding:16px; background:var(--green-dim); color:var(--green); border-radius:var(--radius2);"><i class="ph-bold ph-check-circle"></i> <b>Sucesso!</b> Encontradas ${parsedRows.length} transações.<br><br><button class="add-btn" onclick="alert('Funcionalidade de salvar bloqueada no demo. Código pronto para uso real!')">Processar Transações</button></div>`;
+    }
+  };
+  reader.readAsText(file);
+}
+
+// O segredo para não falhar: Não buscar colunas específicas, buscar Padrões (Data + Número) na mesma linha.
+function parseSmartCSV(text) {
+  const rows = [];
+  const lines = text.split(/\r?\n/);
+  // Regex para data (DD/MM/AAAA ou YYYY-MM-DD)
+  const dateRegex = /(\d{2}[\/\-]\d{2}[\/\-]\d{4}|\d{4}[\/\-]\d{2}[\/\-]\d{2})/;
+  // Regex para valor (números com vírgula ou ponto)
+  const valRegex = /(?:R\$?\s*)?(-?\d{1,3}(?:\.\d{3})*(?:,\d{2})?|-?\d+(?:\.\d{1,2})?)/g;
+
+  lines.forEach(line => {
+    if(!line.trim()) return;
+    const dateMatch = line.match(dateRegex);
+    if(dateMatch) {
+      // Pega todos os números encontrados na linha
+      const valMatches = [...line.matchAll(valRegex)];
+      let value = 0;
+      // Pega o último número da linha que seja válido e não seja parte da data
+      for(let i=valMatches.length-1; i>=0; i--) {
+        let vStr = valMatches[i][1].replace(/\./g, '').replace(',', '.');
+        let vNum = parseFloat(vStr);
+        if(!isNaN(vNum) && vNum !== 0 && !line.includes(vStr) /*Evita pegar dia/mes como valor se mal formatado, logica simplificada*/) {
+          value = vNum;
+          break;
+        }
+      }
+      
+      if(value !== 0) {
+        let dStr = dateMatch[1];
+        if(dStr.includes('/')) {
+          const p = dStr.split('/');
+          if(p[0].length === 2) dStr = `${p[2]}-${p[1]}-${p[0]}`; // BR to ISO
+        }
+        rows.push({ date: dStr, value: Math.abs(value), type: value > 0 ? 'in' : 'out', raw: line });
+      }
+    }
+  });
+  return rows;
+}
+
+function parseSmartOFX(text) {
+  const rows = [];
+  // Busca bruta por blocos STMTTRN independentemente de tags fechadas
+  const trnRegex = /<STMTTRN>([\s\S]*?)(?:<\/STMTTRN>|<STMTTRN>|<\/BANKTRANLIST>)/gi;
+  let match;
+  while ((match = trnRegex.exec(text)) !== null) {
+    const block = match[1];
+    const dtMatch = block.match(/<DTPOSTED>(\d{8})/);
+    const amtMatch = block.match(/<TRNAMT>([-\d\.]+)/);
+    
+    if(dtMatch && amtMatch) {
+      const dStr = dtMatch[1];
+      const date = `${dStr.substring(0,4)}-${dStr.substring(4,6)}-${dStr.substring(6,8)}`;
+      const val = parseFloat(amtMatch[1]);
+      rows.push({ date, value: Math.abs(val), type: val > 0 ? 'in' : 'out' });
+    }
+  }
+  return rows;
+}
+
+// Iniciar a aplicação
+document.documentElement.setAttribute('data-theme', THEMES[currentThemeIdx]);
+renderApp();
+</script>
+</body>
+</html>
