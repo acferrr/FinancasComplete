@@ -1,0 +1,1430 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="acefer-default">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<title>Acefer Economy | Controle Financeiro</title>
+<link rel="icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%23000000'/><text x='50%' y='65%' font-size='60' font-family='sans-serif' font-weight='bold' fill='%23ffffff' text-anchor='middle'>∧</text></svg>">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg: #09090b; --surface: #121216; --surface2: #1c1c24;
+  --border: #272730; --border2: #3f3f46;
+  --text: #f4f4f5; --text2: #a1a1aa; --text3: #71717a;
+  --accent: #6366f1; --accent-hover: #4f46e5; --accent-fg: #ffffff;
+  --green: #10b981; --green-dim: rgba(16, 185, 129, 0.15);
+  --red: #f43f5e; --red-dim: rgba(244, 63, 94, 0.15);
+  --purple: #8b5cf6; --purple-dim: rgba(139, 92, 246, 0.15);
+  --yellow: #f59e0b; --yellow-dim: rgba(245, 158, 11, 0.15);
+  --radius: 12px; --radius-sm: 8px;
+  --shadow: 0 4px 20px -2px rgba(0,0,0,0.5);
+  --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+[data-theme="light"] {
+  --bg: #f8fafc; --surface: #ffffff; --surface2: #f1f5f9;
+  --border: #e2e8f0; --border2: #cbd5e1;
+  --text: #0f172a; --text2: #475569; --text3: #94a3b8;
+  --accent: #4f46e5; --accent-hover: #4338ca; --accent-fg: #ffffff;
+  --shadow: 0 4px 20px -2px rgba(0,0,0,0.05);
+}
+
+[data-theme="emerald"] {
+  --bg: #022c22; --surface: #064e3b; --surface2: #065f46;
+  --border: #047857; --border2: #059669;
+  --text: #ecfdf5; --text2: #a7f3d0; --text3: #6ee7b7;
+  --accent: #10b981; --accent-hover: #059669; --accent-fg: #022c22;
+}
+
+[data-theme="danfer-corporate"] {
+  --bg: #0a0a0f; --surface: #13131a; --surface2: #1e1e2c;
+  --border: #2a2a3d; --border2: #3d3d5c;
+  --text: #ffffff; --text2: #c0c0d0; --text3: #8888a0;
+  --accent: #3b82f6; --accent-hover: #2563eb; --accent-fg: #ffffff;
+  --green: #22c55e; --red: #ef4444; --purple: #a855f7;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Plus Jakarta+Sans', sans-serif; }
+body { background: var(--bg); color: var(--text); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+/* Layout Geral */
+.app-container { display: flex; flex: 1; min-height: 100vh; }
+.sidebar { width: 260px; background: var(--surface); border-right: 1px solid var(--border); display: flex; flex-direction: column; transition: var(--transition); z-index: 100; }
+.sidebar.collapsed { width: 72px; }
+.sidebar-header { padding: 20px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border); }
+.brand-logo { width: 36px; height: 36px; background: var(--accent); color: var(--accent-fg); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.2rem; flex-shrink: 0; }
+.brand-logo.danfer { background: #3b82f6; }
+.brand-title { font-size: 1rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.sidebar.collapsed .brand-title, .sidebar.collapsed .nav-text { display: none; }
+
+.sidebar-nav { padding: 15px 10px; display: flex; flex-direction: column; gap: 6px; flex: 1; overflow-y: auto; }
+.sidebar-nav-item { display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: var(--radius-sm); color: var(--text2); text-decoration: none; font-weight: 600; font-size: 0.9rem; transition: var(--transition); background: transparent; border: none; width: 100%; cursor: pointer; text-align: left; }
+.sidebar-nav-item:hover { background: var(--surface2); color: var(--text); }
+.sidebar-nav-item.active { background: var(--accent); color: var(--accent-fg); }
+.sidebar-nav-item i { font-size: 1.2rem; flex-shrink: 0; }
+
+.main-content { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.topbar { height: 70px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 24px; position: sticky; top: 0; z-index: 90; }
+.topbar-left { display: flex; align-items: center; gap: 16px; }
+.icon-btn { background: var(--surface2); border: 1px solid var(--border); color: var(--text); width: 40px; height: 40px; border-radius: var(--radius-sm); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: var(--transition); }
+.icon-btn:hover { background: var(--border); }
+.topbar-right { display: flex; align-items: center; gap: 12px; }
+
+.content-body { padding: 24px; flex: 1; max-width: 1400px; width: 100%; margin: 0 auto; }
+.page { display: none; animation: fadeIn 0.2s ease-in-out; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Cards & Widgets */
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 24px; }
+.stat-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); position: relative; overflow: hidden; }
+.stat-label { font-size: 0.8rem; font-weight: 600; color: var(--text3); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.stat-value { font-size: 1.6rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; }
+
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; box-shadow: var(--shadow); margin-bottom: 24px; }
+.card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.card-title { font-size: 1.1rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+
+/* Tabelas e Transações */
+.transaction-list { display: flex; flex-direction: column; gap: 8px; }
+.transaction-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; background: var(--surface2); border-radius: var(--radius-sm); border: 1px solid var(--border); transition: var(--transition); cursor: pointer; }
+.transaction-item:hover { border-color: var(--accent); transform: translateX(2px); }
+.tx-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+.tx-info { flex: 1; margin-left: 14px; }
+.tx-desc { font-weight: 600; font-size: 0.95rem; margin-bottom: 2px; }
+.tx-meta { font-size: 0.75rem; color: var(--text3); }
+.tx-amount { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 0.95rem; }
+.tx-actions { display: flex; gap: 8px; margin-left: 12px; }
+.tx-del-btn { background: transparent; border: none; color: var(--text3); cursor: pointer; padding: 6px; border-radius: 4px; transition: var(--transition); }
+.tx-del-btn:hover { background: var(--red-dim); color: var(--red); }
+
+/* Modais */
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); backdrop-filter: blur(4px); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+.modal-overlay.open { display: flex; }
+.modal-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 500px; padding: 24px; box-shadow: var(--shadow); position: relative; animation: scaleIn 0.2s ease; }
+@keyframes scaleIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.form-group { margin-bottom: 16px; }
+.form-label { display: block; font-size: 0.85rem; font-weight: 600; color: var(--text2); margin-bottom: 6px; }
+.form-input, .form-select { width: 100%; padding: 10px 14px; background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius-sm); color: var(--text); font-size: 0.95rem; outline: none; transition: var(--transition); }
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+
+.btn { padding: 10px 18px; border-radius: var(--radius-sm); font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 8px; transition: var(--transition); }
+.btn-primary { background: var(--accent); color: var(--accent-fg); }
+.btn-primary:hover { background: var(--accent-hover); }
+.btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border2); }
+.btn-secondary:hover { background: var(--border); }
+
+/* Dropdown menus */
+.dropdown-menu { position: absolute; right: 0; top: 50px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); width: 220px; display: none; flex-direction: column; z-index: 100; overflow: hidden; }
+.dropdown-menu.open { display: flex; }
+.dropdown-item { padding: 12px 16px; font-size: 0.9rem; font-weight: 600; color: var(--text2); display: flex; align-items: center; gap: 10px; background: none; border: none; text-align: left; width: 100%; cursor: pointer; transition: var(--transition); }
+.dropdown-item:hover { background: var(--surface2); color: var(--text); }
+
+/* Floating Action Button (FAB) */
+.fab { position: fixed; bottom: 24px; right: 24px; width: 56px; height: 56px; background: var(--accent); color: var(--accent-fg); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; box-shadow: 0 4px 14px rgba(99, 102, 241, 0.4); cursor: pointer; border: none; transition: var(--transition); z-index: 80; }
+.fab:hover { transform: scale(1.05); }
+
+/* Tooltip Inteligente */
+#globalTooltip { position: fixed; background: #000; color: #fff; padding: 4px 8px; font-size: 0.75rem; border-radius: 4px; pointer-events: none; z-index: 9999; display: none; box-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+
+/* Mobile sidebar overlay */
+#sidebarOverlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 99; backdrop-filter: blur(2px); }
+#sidebarOverlay.open { display: block; }
+
+/* Sincronização status badge */
+.sync-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 99px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.sync-badge.ok  { background: var(--green-dim); color: var(--green); }
+.sync-badge.err { background: var(--red-dim); color: var(--red); }
+.sync-badge.sync { background: var(--yellow-dim); color: var(--yellow); }
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+  .sidebar { position: fixed; height: 100%; left: -280px; width: 260px !important; z-index: 100; }
+  .sidebar.mobile-open { left: 0; }
+  .sidebar.collapsed { width: 260px !important; left: -280px; }
+  .sidebar.collapsed.mobile-open { left: 0; }
+  .sidebar.collapsed .brand-title, .sidebar.collapsed .nav-text { display: block; }
+  .main-content { margin-left: 0 !important; }
+  .content-body { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<div id="globalTooltip"></div>
+<div id="sidebarOverlay" onclick="closeMobileSidebar()"></div>
+
+<div class="app-container">
+  <!-- SIDEBAR -->
+  <aside class="sidebar" id="sidebarNav">
+    <div class="sidebar-header">
+      <div class="brand-logo" id="mainLogo">∧</div>
+      <div class="brand-title" id="mainTitle">Acefer Economy</div>
+    </div>
+    <div class="sidebar-nav">
+      <button class="sidebar-nav-item active" onclick="showPage('dash', this)"><i class="ph-bold ph-squares-four"></i><span class="nav-text">Visão Geral</span></button>
+      <button class="sidebar-nav-item" onclick="showPage('analysis', this)"><i class="ph-bold ph-chart-pie-slice"></i><span class="nav-text">Análise Detalhada</span></button>
+      <button class="sidebar-nav-item" onclick="showPage('charts', this)"><i class="ph-bold ph-chart-line-up"></i><span class="nav-text">Gráficos & Dashboards</span></button>
+      <button class="sidebar-nav-item" onclick="showPage('goals', this)"><i class="ph-bold ph-target"></i><span class="nav-text">Metas & Planejamento</span></button>
+      <button class="sidebar-nav-item" onclick="showPage('savings', this)"><i class="ph-bold ph-piggy-bank"></i><span class="nav-text">Cofres & Guardados</span></button>
+      <button class="sidebar-nav-item" onclick="showPage('import', this)"><i class="ph-bold ph-file-arrow-down"></i><span class="nav-text">Importar Extrato</span></button>
+      <button class="sidebar-nav-item" onclick="showPage('settings', this)"><i class="ph-bold ph-gear"></i><span class="nav-text">Configurações</span></button>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-left">
+        <button class="icon-btn" onclick="toggleSidebar()"><i class="ph-bold ph-list"></i></button>
+      </div>
+      <div class="topbar-right">
+        <!-- Modo Privacidade -->
+        <button class="icon-btn" onclick="togglePrivacy()" data-tooltip="Ocultar/Exibir Valores"><i class="ph ph-eye-slash" id="privacyIcon"></i></button>
+        
+        <!-- Seletor de Perfis -->
+        <div style="position: relative;">
+          <button class="icon-btn" onclick="toggleDropdown('profileMenu')" data-tooltip="Alternar Perfil"><i class="ph-bold ph-users"></i></button>
+          <div class="dropdown-menu" id="profileMenu">
+            <button class="dropdown-item" onclick="switchProfile('pessoal')"><i class="ph-bold ph-user"></i> Acefer Pessoal</button>
+            <button class="dropdown-item" onclick="switchProfile('danfer')"><i class="ph-bold ph-camera"></i> Danfer Fotografias</button>
+          </div>
+        </div>
+
+        <!-- Seletor de Tema -->
+        <div style="position: relative;">
+          <button class="icon-btn" onclick="toggleDropdown('themeMenu')" data-tooltip="Temas"><i class="ph-bold ph-palette"></i></button>
+          <div class="dropdown-menu" id="themeMenu">
+            <button class="dropdown-item" onclick="setTheme('acefer-default')"><i class="ph-bold ph-moon"></i> Padrão Escuro</button>
+            <button class="dropdown-item" onclick="setTheme('light')"><i class="ph-bold ph-sun"></i> Modo Claro</button>
+            <button class="dropdown-item" onclick="setTheme('emerald')"><i class="ph-bold ph-leaf"></i> Esmeralda</button>
+            <button class="dropdown-item" onclick="setTheme('danfer-corporate')"><i class="ph-bold ph-briefcase"></i> Danfer Corporativo</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-body">
+      <!-- PÁGINA 1: VISÃO GERAL -->
+      <div class="page active" id="page-dash">
+        <!-- Navegador de Mês -->
+        <div class="card" style="padding: 16px 24px; display: flex; align-items: center; justify-content: space-between;">
+          <button class="btn btn-secondary" onclick="changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
+          <div style="font-weight: 700; font-size: 1.1rem;" id="monthLabelDash">Carregando...</div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-secondary" onclick="clearMonthTxs()" data-tooltip="Apagar mês atual"><i class="ph-bold ph-trash"></i></button>
+            <button class="btn btn-secondary" onclick="replaceMonthTxs()" data-tooltip="Substituir Extrato do Mês"><i class="ph-bold ph-arrows-clockwise"></i></button>
+            <button class="btn btn-secondary" onclick="changeMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
+          </div>
+        </div>
+
+        <!-- Cards de Resumo -->
+        <div class="dashboard-grid">
+          <div class="stat-card" style="cursor: pointer;" onclick="openAnalysis('in')">
+            <div class="stat-label"><i class="ph-bold ph-trend-up" style="color:var(--green)"></i> Receitas</div>
+            <div class="stat-value" id="dashTotalIn" style="color: var(--green);">R$ 0,00</div>
+          </div>
+          <div class="stat-card" style="cursor: pointer;" onclick="openAnalysis('out')">
+            <div class="stat-label"><i class="ph-bold ph-trend-down" style="color:var(--red)"></i> Despesas</div>
+            <div class="stat-value" id="dashTotalOut" style="color: var(--red);">R$ 0,00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ph-bold ph-piggy-bank" style="color:var(--purple)"></i> Dinheiro Guardado</div>
+            <div class="stat-value" id="dashTotalSave" style="color: var(--purple);">R$ 0,00</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label"><i class="ph-bold ph-wallet"></i> Saldo Líquido</div>
+            <div class="stat-value" id="dashTotalBalance">R$ 0,00</div>
+          </div>
+        </div>
+
+        <!-- Gráfico Mensal -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-chart-bar"></i> Fluxo dos Últimos 6 Meses</div>
+            <select class="form-select" id="dashChartStyle" onchange="renderMonthlyChart()" style="width: 140px; font-size: 0.85rem; padding: 6px;">
+              <option value="bar">Barras</option>
+              <option value="line">Linhas</option>
+            </select>
+          </div>
+          <div style="height: 260px; position: relative;">
+            <canvas id="dashChartMonthly"></canvas>
+          </div>
+        </div>
+
+        <!-- Transações Recentes -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-clock-counter-clockwise"></i> Lançamentos Recentes</div>
+            <button class="btn btn-primary" onclick="openTxModal()"><i class="ph-bold ph-plus"></i> Lançamento</button>
+          </div>
+          <div class="transaction-list" id="txListDash">
+            <div style="color:var(--text3); text-align:center; padding:20px;">Nenhum lançamento no mês.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 2: ANÁLISE DETALHADA -->
+      <div class="page" id="page-analysis">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-chart-pie-slice"></i> Análise Detalhada de Categoria</div>
+            <div style="display: flex; gap: 12px;">
+              <select class="form-select" id="analysisPeriodSelect" onchange="renderAnalysisView()" style="width: 140px;">
+                <option value="current">Mês Atual</option>
+                <option value="30">Últimos 30 dias</option>
+                <option value="90">Últimos 90 dias</option>
+                <option value="year">Este Ano</option>
+              </select>
+              <select class="form-select" id="catChartType" onchange="renderAnalysisView()" style="width: 130px;">
+                <option value="doughnut">Rosca</option>
+                <option value="pie">Pizza</option>
+                <option value="bar">Barras</option>
+              </select>
+            </div>
+          </div>
+          <div style="display: flex; gap: 20px; align-items: center; margin-bottom: 20px; background: var(--surface2); padding: 16px; border-radius: var(--radius-sm);">
+            <div>
+              <div style="font-size: 0.8rem; color: var(--text3);">TOTAL SELECIONADO</div>
+              <div style="font-size: 1.5rem; font-weight: 800; font-family: 'JetBrains Mono', monospace;" id="analysisCompareVal">R$ 0,00</div>
+            </div>
+            <div style="background: var(--accent); color: var(--accent-fg); padding: 4px 10px; border-radius: 99px; font-size: 0.8rem; font-weight: 700;" id="analysisCompareBadge">0 lançamentos</div>
+          </div>
+          <div style="height: 320px; position: relative;">
+            <canvas id="analysisChartCat"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 3: GRÁFICOS & DASHBOARDS -->
+      <div class="page" id="page-charts">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-chart-line-up"></i> Comparativo Avançado por Categoria</div>
+            <select class="form-select" id="advChartStyle" onchange="renderAdvChart()" style="width: 140px;">
+              <option value="line">Linhas</option>
+              <option value="bar">Barras</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;" id="categoryChipsContainer"></div>
+          <div style="height: 340px; position: relative;">
+            <canvas id="advMultiChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 4: METAS & PLANEJAMENTO -->
+      <div class="page" id="page-goals">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-target"></i> Metas Financeiras</div>
+            <button class="btn btn-primary" onclick="alert('Funcionalidade de metas em desenvolvimento.')"><i class="ph-bold ph-plus"></i> Nova Meta</button>
+          </div>
+          <div style="color: var(--text2); text-align: center; padding: 40px;">Defina limites mensais de gastos e acompanhe sua evolução de perto.</div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 5: COFRES & GUARDADOS -->
+      <div class="page" id="page-savings">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-piggy-bank"></i> Cofres & Reservas</div>
+          </div>
+          <div style="margin-bottom: 20px;">
+            <div style="font-size: 0.85rem; color: var(--text3);">TOTAL GUARDADO ACUMULADO</div>
+            <div style="font-size: 2rem; font-weight: 800; font-family: 'JetBrains Mono', monospace; color: var(--purple);" id="savingsTotalVal">R$ 0,00</div>
+          </div>
+          <div style="color: var(--text2);">Todo valor categorizado como "Dinheiro Guardado" ou "Caixa da Empresa" alimenta este cofre automaticamente.</div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 6: IMPORTAR EXTRATO -->
+      <div class="page" id="page-import">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title"><i class="ph-bold ph-file-arrow-down"></i> Importar Extrato (CSV ou TXT)</div>
+          </div>
+          <div style="border: 2px dashed var(--border2); padding: 40px; border-radius: var(--radius); text-align: center; background: var(--surface2); cursor: pointer; position: relative;" ondragover="event.preventDefault()" ondrop="handleMainDrop(event)">
+            <input type="file" accept=".csv,.txt" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;" onchange="handleMainFileSelect(event)">
+            <i class="ph-duotone ph-upload-simple" style="font-size: 3rem; color: var(--accent); margin-bottom: 12px;"></i>
+            <div style="font-weight: 700; margin-bottom: 4px;">Clique ou arraste seu extrato aqui</div>
+            <div style="font-size: 0.85rem; color: var(--text3);">Leitura inteligente compatível com qualquer banco ou formato CSV/TXT.</div>
+          </div>
+          <div id="importResultMain" style="margin-top: 16px;"></div>
+        </div>
+      </div>
+
+      <!-- PÁGINA 7: CONFIGURAÇÕES -->
+      <div class="page" id="page-settings">
+        <div style="display: flex; flex-direction: column; gap: 20px;">
+
+          <!-- BLOCO 1: IA / GEMINI -->
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header" style="cursor:pointer; margin-bottom:0;" onclick="toggleSettingsSection('sectionAI')">
+              <div class="card-title"><i class="ph-bold ph-sparkle" style="color:var(--yellow)"></i> INTELIGÊNCIA ARTIFICIAL (API GOOGLE GEMINI)</div>
+              <i class="ph-bold ph-caret-up" id="caretAI"></i>
+            </div>
+            <div id="sectionAI" style="margin-top:20px;">
+              <p style="color:var(--text2); font-size:0.9rem; margin-bottom:16px;">Conecte sua chave gratuita do <strong>Google Gemini</strong> para habilitar a <strong>Aura</strong>, sua agente de inteligência financeira pessoal.</p>
+              <div class="form-group">
+                <label class="form-label">Chave de API do Gemini (Google AI Studio)</label>
+                <input type="password" class="form-input" id="geminiKeyInput" placeholder="AlzaSy..." autocomplete="off">
+              </div>
+              <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <button class="btn btn-primary" onclick="saveGeminiKey()"><i class="ph-bold ph-floppy-disk"></i> Salvar Chave</button>
+                <a href="https://aistudio.google.com/app/apikey" target="_blank" style="color:var(--yellow); font-size:0.85rem; font-weight:600;">Obter chave gratuita no Google AI Studio →</a>
+              </div>
+              <div id="geminiKeyStatus" style="margin-top:10px; font-size:0.8rem; color:var(--text3);"></div>
+            </div>
+          </div>
+
+          <!-- BLOCO 2: CONTA & PERFIL -->
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header" style="cursor:pointer; margin-bottom:0;" onclick="toggleSettingsSection('sectionAccount')">
+              <div class="card-title"><i class="ph-bold ph-user-circle" style="color:var(--accent)"></i> CONTA & PERFIL DE ACESSO</div>
+              <i class="ph-bold ph-caret-up" id="caretAccount"></i>
+            </div>
+            <div id="sectionAccount" style="margin-top:20px;">
+              <!-- Supabase sync -->
+              <div style="background:var(--surface2); border:1px solid var(--border2); border-radius:var(--radius-sm); padding:16px; margin-bottom:8px;">
+                <div style="font-weight:700; font-size:0.9rem; margin-bottom:4px; display:flex; align-items:center; gap:8px;">
+                  <i class="ph-bold ph-cloud" style="color:var(--accent)"></i> Sincronização em Nuvem (Supabase)
+                  <span id="syncStatusBadge" class="sync-badge">não configurado</span>
+                </div>
+                <p style="font-size:0.8rem; color:var(--text3); margin-bottom:12px;">Conecte seu Supabase para sincronizar dados entre PC e celular gratuitamente.</p>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label class="form-label">URL do Projeto</label>
+                  <input type="text" class="form-input" id="supabaseUrl" placeholder="https://xxxx.supabase.co" autocomplete="off">
+                </div>
+                <div class="form-group" style="margin-bottom:10px;">
+                  <label class="form-label">Anon Key (pública)</label>
+                  <input type="password" class="form-input" id="supabaseKey" placeholder="eyJhbGciOi..." autocomplete="off">
+                </div>
+                <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                  <button class="btn btn-primary" onclick="saveSupabaseConfig()"><i class="ph-bold ph-plug"></i> Conectar & Sincronizar</button>
+                  <button class="btn btn-secondary" onclick="syncFromCloud()" id="btnSyncDown"><i class="ph-bold ph-cloud-arrow-down"></i> Baixar da Nuvem</button>
+                  <button class="btn btn-secondary" onclick="syncToCloud()" id="btnSyncUp"><i class="ph-bold ph-cloud-arrow-up"></i> Enviar para Nuvem</button>
+                </div>
+                <div id="supabaseStatus" style="margin-top:10px; font-size:0.8rem; color:var(--text3);"></div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nome de exibição (Perfil Pessoal)</label>
+                <input type="text" class="form-input" id="settingsNamePessoal" placeholder="Ex: Alex">
+              </div>
+              <div class="form-group">
+                <label class="form-label">Nome de exibição (Danfer)</label>
+                <input type="text" class="form-input" id="settingsNameDanfer" placeholder="Ex: Danfer Fotografias">
+              </div>
+              <div class="form-group">
+                <label class="form-label">E-mail do Usuário</label>
+                <input type="email" class="form-input" id="settingsEmail" placeholder="alex@acefer.com">
+              </div>
+              <div style="display:flex; gap:12px; flex-wrap:wrap; margin-top:4px;">
+                <button class="btn btn-primary" onclick="saveAccountSettings()"><i class="ph-bold ph-floppy-disk"></i> Salvar Alterações</button>
+                <button class="btn btn-secondary" onclick="confirmLogout()" style="color:var(--red); border-color:var(--red);"><i class="ph-bold ph-sign-out"></i> Encerrar Sessão (Sair)</button>
+              </div>
+              <div id="accountSettingsStatus" style="margin-top:10px; font-size:0.8rem; color:var(--text3);"></div>
+            </div>
+          </div>
+
+          <!-- BLOCO 3: BACKUP & EXPORTAÇÃO -->
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header" style="cursor:pointer; margin-bottom:0;" onclick="toggleSettingsSection('sectionBackup')">
+              <div class="card-title"><i class="ph-bold ph-database" style="color:var(--green)"></i> CENTRAL DE BACKUP, EXPORTAÇÃO & AUTOMAÇÃO</div>
+              <i class="ph-bold ph-caret-up" id="caretBackup"></i>
+            </div>
+            <div id="sectionBackup" style="margin-top:20px; display:flex; flex-direction:column; gap:10px;">
+              <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px;" onclick="exportJSON()">
+                <i class="ph-bold ph-file-js" style="font-size:1.1rem; color:var(--yellow)"></i>
+                <span><strong>Exportar Todos os Dados (JSON)</strong><br><small style="color:var(--text3); font-weight:400;">Backup completo de todas as transações e configurações</small></span>
+              </button>
+              <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px;" onclick="exportCSV()">
+                <i class="ph-bold ph-file-csv" style="font-size:1.1rem; color:var(--green)"></i>
+                <span><strong>Exportar Relatório Detalhado (CSV)</strong><br><small style="color:var(--text3); font-weight:400;">Planilha com todas as transações do período</small></span>
+              </button>
+              <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px;" onclick="downloadSourceCode()">
+                <i class="ph-bold ph-code" style="font-size:1.1rem; color:var(--accent)"></i>
+                <span><strong>Baixar Código Fonte Completo (index.html)</strong><br><small style="color:var(--text3); font-weight:400;">Salva o app localmente para backup ou edição</small></span>
+              </button>
+              <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px;" onclick="exportMarkdown()">
+                <i class="ph-bold ph-file-text" style="font-size:1.1rem; color:var(--purple)"></i>
+                <span><strong>Baixar Prompt de Engenharia / Automação (.md)</strong><br><small style="color:var(--text3); font-weight:400;">Documento com contexto do app para usar em IAs</small></span>
+              </button>
+              <button class="btn btn-secondary" style="justify-content:flex-start; gap:14px; color:var(--red); border-color:var(--red);" onclick="clearAllData()">
+                <i class="ph-bold ph-trash" style="font-size:1.1rem;"></i>
+                <span><strong>Resetar Todos os Dados do App</strong><br><small style="font-weight:400; opacity:0.8;">Remove todas as transações do navegador. Irreversível.</small></span>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- FAB para Adicionar Lançamento -->
+<button class="fab" onclick="openTxModal()" data-tooltip="Novo Lançamento"><i class="ph-bold ph-plus"></i></button>
+
+<!-- MODAL DE LANÇAMENTOS / IMPORTAÇÃO -->
+<div class="modal-overlay" id="txModal">
+  <div class="modal-card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+      <div style="font-weight: 700; font-size: 1.1rem;">Lançamento Financeiro</div>
+      <button class="icon-btn" onclick="closeTxModal()"><i class="ph-bold ph-x"></i></button>
+    </div>
+
+    <div style="display: flex; gap: 8px; margin-bottom: 20px; background: var(--surface2); padding: 4px; border-radius: var(--radius-sm);">
+      <button class="btn" id="tabManualBtn" onclick="switchTxModalTab('manual')" style="flex: 1; justify-content: center; background: var(--accent); color: var(--accent-fg);">Manual</button>
+      <button class="btn" id="tabImportBtn" onclick="switchTxModalTab('import')" style="flex: 1; justify-content: center; background: var(--surface); color: var(--text);">Importar Lote</button>
+    </div>
+
+    <!-- Aba Manual -->
+    <div id="txModalManualTab">
+      <input type="hidden" id="txEditId">
+      <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+        <button type="button" class="btn btn-secondary" id="btnTypeOut" onclick="setTxType('out')" style="flex: 1;">Despesa</button>
+        <button type="button" class="btn btn-secondary" id="btnTypeIn" onclick="setTxType('in')" style="flex: 1;">Receita</button>
+        <button type="button" class="btn btn-secondary" id="btnTypeSave" onclick="setTxType('save')" style="flex: 1;">Guardar</button>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input type="text" class="form-input" id="txDesc" placeholder="Ex: Supermercado, Cliente X...">
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="form-group">
+          <label class="form-label">Valor (R$)</label>
+          <input type="number" step="0.01" class="form-input" id="txValue" placeholder="0,00">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Data</label>
+          <input type="date" class="form-input" id="txDate">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select class="form-select" id="txCategory"></select>
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+        <button class="btn btn-secondary" onclick="closeTxModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="saveTx()">Salvar Lançamento</button>
+      </div>
+    </div>
+
+    <!-- Aba Importação -->
+    <div id="txModalImportTab" style="display: none;">
+      <div style="border: 2px dashed var(--border2); padding: 24px; border-radius: var(--radius); text-align: center; background: var(--surface2); cursor: pointer; position: relative; margin-bottom: 16px;" ondragover="event.preventDefault()" ondrop="handleModalDrop(event)">
+        <input type="file" accept=".csv,.txt" style="position: absolute; inset: 0; opacity: 0; cursor: pointer;" onchange="handleModalFileSelect(event)">
+        <i class="ph-duotone ph-file-csv" style="font-size: 2.5rem; color: var(--accent); margin-bottom: 8px;"></i>
+        <div style="font-weight: 700; font-size: 0.9rem;">Selecione o arquivo CSV ou TXT</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Ou cole os dados do extrato:</label>
+        <textarea class="form-input" id="modalImportText" rows="4" placeholder="Cole linhas do extrato bancário aqui..."></textarea>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 10px;">
+        <button class="btn btn-secondary" onclick="closeTxModal()">Cancelar</button>
+        <button class="btn btn-primary" onclick="processModalTextImport()">Processar Extrato</button>
+      </div>
+      <div id="modalImportResult" style="margin-top: 12px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+<div class="modal-overlay" id="confirmModal">
+  <div class="modal-card" style="max-width: 380px; text-align: center;">
+    <i class="ph-duotone ph-warning-circle" style="font-size: 3rem; color: var(--red); margin-bottom: 12px;"></i>
+    <div style="font-weight: 700; font-size: 1.1rem; margin-bottom: 8px;">Excluir Lançamento?</div>
+    <div style="font-size: 0.9rem; color: var(--text2); margin-bottom: 24px;">Esta ação não poderá ser desfeita.</div>
+    <div style="display: flex; gap: 10px; justify-content: center;">
+      <button class="btn btn-secondary" onclick="closeConfirmModal()">Cancelar</button>
+      <button class="btn btn-primary" onclick="executeDelete()" style="background: var(--red);">Sim, Excluir</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let CURRENT_PROFILE = 'pessoal';
+
+const CAT_PESSOAL = {
+  out: [
+    {id:'alimentacao', label:'Alimentação', icon:'ph-shopping-cart', color:'#f59e0b'},
+    {id:'moradia', label:'Moradia', icon:'ph-house', color:'#ef4444'},
+    {id:'transporte', label:'Transporte', icon:'ph-car', color:'#14b8a6'},
+    {id:'saude', label:'Saúde', icon:'ph-heartbeat', color:'#ec4899'},
+    {id:'lazer', label:'Lazer', icon:'ph-game-controller', color:'#06b6d4'},
+    {id:'outros', label:'Outros', icon:'ph-dots-three-circle', color:'#94a3b8'}
+  ],
+  in: [
+    {id:'salario', label:'Salário', icon:'ph-briefcase', color:'#10b981'},
+    {id:'outros_in', label:'Outros', icon:'ph-money', color:'#94a3b8'}
+  ],
+  save: [
+    {id:'guardado', label:'Dinheiro Guardado', icon:'ph-piggy-bank', color:'#8b5cf6'}
+  ]
+};
+
+const CAT_DANFER = {
+  out: [
+    {id:'impostos', label:'Impostos/Taxas', icon:'ph-receipt', color:'#ef4444'},
+    {id:'fornecedores', label:'Fornecedores', icon:'ph-truck', color:'#f59e0b'},
+    {id:'prolabore', label:'Pró-Labore', icon:'ph-wallet', color:'#14b8a6'},
+    {id:'equipamentos', label:'Equipamentos/Software', icon:'ph-camera', color:'#06b6d4'},
+    {id:'operacional', label:'Custo Operacional', icon:'ph-gear', color:'#94a3b8'}
+  ],
+  in: [
+    {id:'servicos', label:'Vendas de Serviços', icon:'ph-camera-plus', color:'#10b981'},
+    {id:'rendimentos', label:'Rendimentos', icon:'ph-trend-up', color:'#3b82f6'}
+  ],
+  save: [
+    {id:'caixa', label:'Caixa da Empresa / Reserva', icon:'ph-bank', color:'#8b5cf6'}
+  ]
+};
+
+let TRANSACTIONS = [];
+let GOALS = [];
+let currentMonth = new Date().getMonth();
+let currentYear = new Date().getFullYear();
+let privacyMode = false;
+let currentAnalysisType = 'out';
+let currentTxType = 'out';
+let activeCategories = [];
+
+let dashChart = null;
+let analysisChartCat = null;
+let advMultiChart = null;
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function loadProfileData() {
+  const txKey = CURRENT_PROFILE === 'pessoal' ? 'acefer_txs' : 'danfer_txs';
+  const goalKey = CURRENT_PROFILE === 'pessoal' ? 'acefer_goals' : 'danfer_goals';
+  TRANSACTIONS = JSON.parse(localStorage.getItem(txKey)) || [];
+  GOALS = JSON.parse(localStorage.getItem(goalKey)) || [];
+  const cats = CURRENT_PROFILE === 'pessoal' ? CAT_PESSOAL : CAT_DANFER;
+  activeCategories = cats.out.map(c => c.id);
+}
+
+function saveLocalStorage() {
+  const txKey = CURRENT_PROFILE === 'pessoal' ? 'acefer_txs' : 'danfer_txs';
+  const goalKey = CURRENT_PROFILE === 'pessoal' ? 'acefer_goals' : 'danfer_goals';
+  localStorage.setItem(txKey, JSON.stringify(TRANSACTIONS));
+  localStorage.setItem(goalKey, JSON.stringify(GOALS));
+}
+
+function switchProfile(profile) {
+  CURRENT_PROFILE = profile;
+  loadProfileData();
+  const logo = document.getElementById('mainLogo');
+  const title = document.getElementById('mainTitle');
+  if(profile === 'danfer') {
+    setTheme('danfer-corporate');
+    logo.classList.add('danfer');
+    logo.innerHTML = '<i class="ph-bold ph-camera"></i>';
+    title.textContent = 'Danfer Fotografias';
+  } else {
+    const savedTheme = localStorage.getItem('acefer_theme') || 'acefer-default';
+    if(savedTheme === 'danfer-corporate') setTheme('acefer-default');
+    else setTheme(savedTheme);
+    logo.classList.remove('danfer');
+    logo.innerHTML = '∧';
+    title.textContent = 'Acefer Economy';
+  }
+  document.getElementById('profileMenu').classList.remove('open');
+  renderApp();
+  renderAdvChartsSetup();
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+  loadProfileData();
+  const savedTheme = localStorage.getItem('acefer_theme');
+  if(savedTheme) document.documentElement.setAttribute('data-theme', savedTheme);
+  // Pré-carrega credenciais Supabase se ainda não configuradas
+  if(!localStorage.getItem('acefer_sb_url')) localStorage.setItem('acefer_sb_url', 'https://upcqeuzdpbvagxusrxso.supabase.co');
+  if(!localStorage.getItem('acefer_sb_key')) localStorage.setItem('acefer_sb_key', 'sb_publishable_cHWy5EVrV5seXxKQLVhzLA_y-9T75kA');
+  // Se Supabase configurado, baixa dados atualizados silenciosamente
+  if(localStorage.getItem('acefer_sb_url') && localStorage.getItem('acefer_sb_key')) {
+    setSyncBadge('sync', '⟳ sincronizando');
+    try {
+      const sb = getSupabase();
+      if(sb) {
+        const {data, error} = await sb.from('acefer_transactions').select('*');
+        if(!error && data && data.length > 0) {
+          const pessoal = data.filter(t=>t.profile==='pessoal').map(t=>({id:t.id, type:t.type, value:Number(t.value), date:t.date, category:t.category, desc:t.descricao||''}));
+          const danfer  = data.filter(t=>t.profile==='danfer').map(t=>({id:t.id, type:t.type, value:Number(t.value), date:t.date, category:t.category, desc:t.descricao||''}));
+          localStorage.setItem('acefer_txs', JSON.stringify(pessoal));
+          localStorage.setItem('danfer_txs', JSON.stringify(danfer));
+          loadProfileData();
+          setSyncBadge('ok', '✓ sincronizado');
+        }
+      }
+    } catch(e) { setSyncBadge('err', 'offline'); }
+  }
+  renderApp();
+  renderAdvChartsSetup();
+});
+
+const formatBRL = (n) => privacyMode ? 'R$ *******' : 'R$ ' + Number(n||0).toLocaleString('pt-BR', {minimumFractionDigits:2});
+
+function toggleDropdown(id) { document.getElementById(id).classList.toggle('open'); }
+
+// ─── SIDEBAR MOBILE ───────────────────────────────────────────────────────────
+function toggleSidebar() {
+  const sidebar = document.getElementById('sidebarNav');
+  const overlay = document.getElementById('sidebarOverlay');
+  const isMobile = window.innerWidth <= 768;
+  if(isMobile) {
+    const isOpen = sidebar.classList.contains('mobile-open');
+    if(isOpen) { sidebar.classList.remove('mobile-open'); overlay.classList.remove('open'); }
+    else { sidebar.classList.add('mobile-open'); overlay.classList.add('open'); }
+  } else {
+    sidebar.classList.toggle('collapsed');
+  }
+}
+function closeMobileSidebar() {
+  document.getElementById('sidebarNav').classList.remove('mobile-open');
+  document.getElementById('sidebarOverlay').classList.remove('open');
+}
+function togglePrivacy() {
+  privacyMode = !privacyMode;
+  document.getElementById('privacyIcon').className = privacyMode ? 'ph ph-eye' : 'ph ph-eye-slash';
+  renderApp();
+  if(document.getElementById('page-analysis').classList.contains('active')) renderAnalysisView();
+}
+
+function setTheme(themeName) {
+  document.documentElement.setAttribute('data-theme', themeName);
+  localStorage.setItem('acefer_theme', themeName);
+  document.getElementById('themeMenu').classList.remove('open');
+}
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderApp();
+}
+
+function showPage(pageId, navItem) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelectorAll('.sidebar-nav-item').forEach(b => b.classList.remove('active'));
+  if(navItem) navItem.classList.add('active');
+  if(pageId === 'analysis') renderAnalysisView();
+  if(pageId === 'charts') renderAdvChartsSetup();
+  if(pageId === 'savings') renderSavingsView();
+  if(pageId === 'settings') loadSettingsPage();
+  // fecha sidebar no mobile ao navegar
+  if(window.innerWidth <= 768) closeMobileSidebar();
+}
+
+function getCatInfo(type, catId) {
+  const cats = CURRENT_PROFILE === 'pessoal' ? CAT_PESSOAL : CAT_DANFER;
+  const list = cats[type] || [];
+  return list.find(c => c.id === catId) || {label: catId, icon: 'ph-question', color: '#94a3b8'};
+}
+
+function txInCurrentMonth(t) {
+  const [y, m] = t.date.split('-');
+  return parseInt(m) - 1 === currentMonth && parseInt(y) === currentYear;
+}
+
+function renderApp() {
+  document.getElementById('monthLabelDash').textContent = `${MONTHS[currentMonth]} ${currentYear}`;
+  const txs = TRANSACTIONS.filter(txInCurrentMonth);
+  const inp = txs.filter(t=>t.type==='in').reduce((s,t)=>s+t.value, 0);
+  const out = txs.filter(t=>t.type==='out').reduce((s,t)=>s+t.value, 0);
+  const save = txs.filter(t=>t.type==='save').reduce((s,t)=>s+t.value, 0);
+  
+  document.getElementById('dashTotalIn').textContent = formatBRL(inp);
+  document.getElementById('dashTotalOut').textContent = formatBRL(out);
+  document.getElementById('dashTotalSave').textContent = formatBRL(save);
+  
+  const net = inp - out;
+  const balEl = document.getElementById('dashTotalBalance');
+  balEl.textContent = formatBRL(net);
+  balEl.style.color = net >= 0 ? 'var(--green)' : 'var(--red)';
+
+  const listEl = document.getElementById('txListDash');
+  listEl.innerHTML = txs.sort((a,b)=>b.date.localeCompare(a.date)).map(t => {
+    const cat = getCatInfo(t.type, t.category);
+    const cColor = t.type === 'in' ? 'var(--green)' : (t.type === 'save' ? 'var(--purple)' : 'var(--red)');
+    const bgc = t.type === 'in' ? 'var(--green-dim)' : (t.type === 'save' ? 'var(--purple-dim)' : 'var(--red-dim)');
+    const sign = t.type === 'in' ? '+' : (t.type === 'save' ? '🐷 ' : '-');
+    return `<div class="transaction-item" onclick="openTxModal(${t.id})" data-tooltip="Editar">
+      <div class="tx-icon" style="background:${bgc}; color:${cColor}"><i class="ph ${cat.icon}"></i></div>
+      <div class="tx-info">
+        <div class="tx-desc">${t.desc || cat.label}</div>
+        <div class="tx-meta">${t.date.split('-').reverse().join('/')} · ${cat.label}</div>
+      </div>
+      <div class="tx-amount ${t.type}" style="color:${cColor}">${privacyMode ? 'R$ ***' : sign + formatBRL(t.value).replace('R$ ','')}</div>
+      <div class="tx-actions" onclick="event.stopPropagation()">
+        <button class="tx-del-btn" onclick="openConfirmModal(${t.id})" data-tooltip="Apagar"><i class="ph-bold ph-trash"></i></button>
+      </div>
+    </div>`;
+  }).join('') || '<div style="color:var(--text3); text-align:center; padding:20px;">Nenhum lançamento.</div>';
+
+  renderMonthlyChart();
+}
+
+function renderMonthlyChart() {
+  const ctx = document.getElementById('dashChartMonthly').getContext('2d');
+  if(dashChart) dashChart.destroy();
+  const labels = [], ins = [], outs = [], saves = [];
+  for(let i=5; i>=0; i--) {
+    let m = currentMonth - i, y = currentYear;
+    if(m<0) { m+=12; y--; }
+    labels.push(MONTHS[m].slice(0,3));
+    const mtxs = TRANSACTIONS.filter(t => {
+      const [ty, tm] = t.date.split('-');
+      return parseInt(tm) - 1 === m && parseInt(ty) === y;
+    });
+    ins.push(mtxs.filter(t=>t.type==='in').reduce((s,t)=>s+t.value,0));
+    outs.push(mtxs.filter(t=>t.type==='out').reduce((s,t)=>s+t.value,0));
+    saves.push(mtxs.filter(t=>t.type==='save').reduce((s,t)=>s+t.value,0));
+  }
+  const chartStyle = document.getElementById('dashChartStyle').value;
+  dashChart = new Chart(ctx, {
+    type: chartStyle === 'bar' ? 'bar' : 'line',
+    data: { 
+      labels, 
+      datasets: [
+        { label: 'Receitas', data: ins, backgroundColor: '#10b981', borderColor: '#10b981', borderWidth: 2, fill: false, tension: 0.3, borderRadius: 4 },
+        { label: 'Despesas', data: outs, backgroundColor: '#f43f5e', borderColor: '#f43f5e', borderWidth: 2, fill: false, tension: 0.3, borderRadius: 4 },
+        { label: 'Guardado', data: saves, backgroundColor: '#8b5cf6', borderColor: '#8b5cf6', borderWidth: 2, fill: false, tension: 0.3, borderRadius: 4 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { labels: { color: '#a1a1aa' } } },
+      scales: {
+        x: { grid: {display:false}, ticks: {color: '#a1a1aa'}, stacked: chartStyle === 'bar' },
+        y: { grid: {color: 'rgba(128,128,128,0.1)'}, ticks: {color: '#a1a1aa'} }
+      }
+    }
+  });
+}
+
+function openAnalysis(type) { currentAnalysisType = type; showPage('analysis'); }
+
+function renderAnalysisView() {
+  const period = document.getElementById('analysisPeriodSelect').value;
+  let txs = TRANSACTIONS.filter(t => t.type === currentAnalysisType);
+  if(period === 'current') { txs = txs.filter(txInCurrentMonth); } 
+  else if(period === 'year') { txs = txs.filter(t => t.date.startsWith(currentYear.toString())); }
+  else {
+    const days = parseInt(period);
+    const limit = new Date(); limit.setDate(limit.getDate() - days);
+    txs = txs.filter(t => new Date(t.date+'T12:00:00') >= limit);
+  }
+  const total = txs.reduce((s,t)=>s+t.value, 0);
+  document.getElementById('analysisCompareVal').textContent = formatBRL(total);
+  document.getElementById('analysisCompareBadge').textContent = `${txs.length} lançamentos contabilizados`;
+
+  const ctx = document.getElementById('analysisChartCat').getContext('2d');
+  if(analysisChartCat) analysisChartCat.destroy();
+  const map = {}; txs.forEach(t => { map[t.category] = (map[t.category]||0) + t.value; });
+  const labels = [], data = [], bg = [];
+  Object.keys(map).sort((a,b)=>map[b]-map[a]).forEach(cId => {
+    const info = getCatInfo(currentAnalysisType, cId);
+    labels.push(info.label); data.push(map[cId]); bg.push(info.color);
+  });
+  const chartType = document.getElementById('catChartType').value;
+  analysisChartCat = new Chart(ctx, {
+    type: chartType === 'bar' ? 'bar' : chartType,
+    data: { labels, datasets: [{ data, backgroundColor: bg, borderColor: bg, borderWidth: 1 }] },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'right', labels:{color:'#888'} } }
+    }
+  });
+}
+
+function renderAdvChartsSetup() {
+  const cats = CURRENT_PROFILE === 'pessoal' ? CAT_PESSOAL : CAT_DANFER;
+  const container = document.getElementById('categoryChipsContainer');
+  container.innerHTML = cats.out.map(c => `
+    <button type="button" onclick="toggleCategoryChip('${c.id}')" style="padding:6px 12px; border-radius:99px; border:1px solid ${c.color}; background:${activeCategories.includes(c.id)?c.color:'transparent'}; color:${activeCategories.includes(c.id)?'#000':c.color}; font-weight:600; font-size:0.8rem; cursor:pointer;">
+      ${c.label}
+    </button>
+  `).join('');
+  renderAdvChart();
+}
+
+function toggleCategoryChip(cId) {
+  if(activeCategories.includes(cId)) activeCategories = activeCategories.filter(id => id !== cId);
+  else activeCategories.push(cId);
+  renderAdvChartsSetup();
+}
+
+function renderAdvChart() {
+  const ctx = document.getElementById('advMultiChart').getContext('2d');
+  if(advMultiChart) advMultiChart.destroy();
+  const style = document.getElementById('advChartStyle').value;
+  const last6 = [];
+  for(let i=5; i>=0; i--) {
+    let m = currentMonth - i, y = currentYear; if(m<0) { m+=12; y--; }
+    last6.push({ ym: `${y}-${String(m+1).padStart(2,'0')}`, label: MONTHS[m].slice(0,3) });
+  }
+  const datasets = activeCategories.map(cId => {
+    const catObj = getCatInfo('out', cId);
+    const data = last6.map(mObj => TRANSACTIONS.filter(t => t.type==='out' && t.category===cId && t.date.startsWith(mObj.ym)).reduce((s,t)=>s+t.value, 0));
+    return { label: catObj.label, data, borderColor: catObj.color, backgroundColor: catObj.color, borderWidth: 2, fill: false, tension: 0.3 };
+  });
+  advMultiChart = new Chart(ctx, {
+    type: style, data: { labels: last6.map(m=>m.label), datasets },
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: {labels:{color:'#888'}} } }
+  });
+}
+
+function renderSavingsView() {
+  const total = TRANSACTIONS.filter(t=>t.type==='save').reduce((s,t)=>s+t.value,0);
+  document.getElementById('savingsTotalVal').textContent = formatBRL(total);
+}
+
+function clearMonthTxs() {
+  if(confirm(`ATENÇÃO: Apagar TODOS os lançamentos de ${MONTHS[currentMonth]}/${currentYear}?`)) {
+    TRANSACTIONS = TRANSACTIONS.filter(t => !txInCurrentMonth(t));
+    saveLocalStorage(); renderApp();
+  }
+}
+function replaceMonthTxs() {
+  if(confirm(`Deseja apagar os lançamentos de ${MONTHS[currentMonth]} e importar novos?`)) {
+    TRANSACTIONS = TRANSACTIONS.filter(t => !txInCurrentMonth(t));
+    saveLocalStorage(); renderApp(); openTxModal(); switchTxModalTab('import');
+  }
+}
+
+let txToDelete = null;
+function openConfirmModal(id) { txToDelete = id; document.getElementById('confirmModal').classList.add('open'); }
+function closeConfirmModal() { txToDelete = null; document.getElementById('confirmModal').classList.remove('open'); }
+function executeDelete() {
+  if(txToDelete) {
+    TRANSACTIONS = TRANSACTIONS.filter(t => t.id !== txToDelete);
+    saveLocalStorage(); renderApp(); closeConfirmModal();
+  }
+}
+
+function openTxModal(id = null) {
+  document.getElementById('txModal').classList.add('open');
+  const catSel = document.getElementById('txCategory');
+  if(id) {
+    switchTxModalTab('manual');
+    const t = TRANSACTIONS.find(x => x.id === id);
+    document.getElementById('txEditId').value = t.id;
+    setTxType(t.type);
+    document.getElementById('txDesc').value = t.desc;
+    document.getElementById('txValue').value = t.value;
+    document.getElementById('txDate').value = t.date;
+    catSel.value = t.category;
+  } else {
+    switchTxModalTab('manual');
+    document.getElementById('txEditId').value = '';
+    setTxType('out');
+    document.getElementById('txDesc').value = '';
+    document.getElementById('txValue').value = '';
+    const today = new Date();
+    document.getElementById('txDate').value = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+  }
+}
+function closeTxModal() { document.getElementById('txModal').classList.remove('open'); }
+
+function switchTxModalTab(tab) {
+  document.getElementById('txModalManualTab').style.display = tab === 'manual' ? 'block' : 'none';
+  document.getElementById('txModalImportTab').style.display = tab === 'import' ? 'block' : 'none';
+  document.getElementById('tabManualBtn').style.background = tab === 'manual' ? 'var(--accent)' : 'var(--surface)';
+  document.getElementById('tabManualBtn').style.color = tab === 'manual' ? 'var(--accent-fg)' : 'var(--text)';
+  document.getElementById('tabImportBtn').style.background = tab === 'import' ? 'var(--accent)' : 'var(--surface)';
+  document.getElementById('tabImportBtn').style.color = tab === 'import' ? 'var(--accent-fg)' : 'var(--text)';
+}
+
+function setTxType(type) {
+  currentTxType = type;
+  ['Out','In','Save'].forEach(k => { const b = document.getElementById('btnType'+k); b.style.background='var(--surface)'; b.style.color='var(--text)'; b.style.borderColor='var(--border2)'; });
+  const act = document.getElementById('btnType' + type.charAt(0).toUpperCase() + type.slice(1));
+  act.style.background = type==='in'?'var(--green-dim)':type==='out'?'var(--red-dim)':'var(--purple-dim)';
+  act.style.color = type==='in'?'var(--green)':type==='out'?'var(--red)':'var(--purple)';
+  act.style.borderColor = act.style.color;
+  const cats = CURRENT_PROFILE === 'pessoal' ? CAT_PESSOAL : CAT_DANFER;
+  document.getElementById('txCategory').innerHTML = cats[type].map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+}
+
+function saveTx() {
+  const id = document.getElementById('txEditId').value;
+  const desc = document.getElementById('txDesc').value;
+  const val = parseFloat(document.getElementById('txValue').value);
+  const date = document.getElementById('txDate').value;
+  const cat = document.getElementById('txCategory').value;
+  if(!desc || isNaN(val) || !date) return alert('Preencha tudo.');
+  if(id) {
+    const t = TRANSACTIONS.find(x => x.id == id);
+    t.type = currentTxType; t.desc = desc; t.value = val; t.date = date; t.category = cat;
+  } else {
+    TRANSACTIONS.push({ id: Date.now(), type: currentTxType, value: val, date, category: cat, desc });
+  }
+  const [dy, dm] = date.split('-');
+  currentYear = parseInt(dy);
+  currentMonth = parseInt(dm) - 1;
+  saveLocalStorage(); closeTxModal(); renderApp();
+  autoSyncIfConfigured();
+}
+
+function handleMainFileSelect(e) { if(e.target.files[0]) processFile(e.target.files[0], 'importResultMain'); }
+function handleMainDrop(e) { e.preventDefault(); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0], 'importResultMain'); }
+function handleModalFileSelect(e) { if(e.target.files[0]) processFile(e.target.files[0], 'modalImportResult'); }
+function handleModalDrop(e) { e.preventDefault(); if(e.dataTransfer.files[0]) processFile(e.dataTransfer.files[0], 'modalImportResult'); }
+function processModalTextImport() {
+  const text = document.getElementById('modalImportText').value;
+  if(text.trim()) processTextData(text, 'modalImportResult');
+}
+
+function processFile(file, resultElId) {
+  const resEl = document.getElementById(resultElId);
+  resEl.innerHTML = `<div style="color:var(--text2)">Analisando...</div>`;
+  const reader = new FileReader();
+  reader.onload = (ev) => processTextData(ev.target.result, resultElId);
+  reader.readAsText(file);
+}
+
+function processTextData(content, resultElId) {
+  const rows = parseSmartUniversal(content);
+  const resEl = document.getElementById(resultElId);
+  if(rows.length === 0) {
+    resEl.innerHTML = `<div style="color:var(--red); font-size:0.85rem;">Nenhuma transação encontrada.</div>`;
+  } else {
+    rows.forEach(r => TRANSACTIONS.push({ id: Date.now() + Math.random(), ...r }));
+    saveLocalStorage();
+    resEl.innerHTML = `<div style="color:var(--green); font-size:0.9rem; font-weight:600;"><i class="ph-bold ph-check-circle"></i> Sucesso! ${rows.length} transações importadas.</div>`;
+    if(rows[0]) {
+      const [y, m] = rows[0].date.split('-');
+      currentYear = parseInt(y); currentMonth = parseInt(m) - 1;
+    }
+    autoSyncIfConfigured();
+    setTimeout(() => { if(resultElId==='modalImportResult') closeTxModal(); renderApp(); }, 1200);
+  }
+}
+
+// ─── PARSER CSV UNIVERSAL ───────────────────────────────────────────────────
+// Suporta: Inter/Nubank (RELEASE_DATE;TRANSACTION_TYPE;...;AMOUNT;BALANCE)
+//          Nubank cartão (date,title,amount)
+//          Bradesco/Itaú/BB (Data;Histórico;Crédito;Débito)
+//          Formato genérico com data + valor signed
+function parseSmartUniversal(text) {
+  const rows = [];
+  // normaliza line endings e remove BOM
+  const rawLines = text.replace(/^﻿/, '').split(/\r?\n/);
+
+  // detecta separador predominante
+  const sep = detectSep(rawLines);
+
+  // ── FORMATO INTER/NUBANK conta: RELEASE_DATE;TRANSACTION_TYPE;REF;AMOUNT;BALANCE ──
+  // Pula preamble (INITIAL_BALANCE...) e header (RELEASE_DATE...)
+  const headerIdx = rawLines.findIndex(l => /RELEASE_DATE|DATA_LANCAMENTO/i.test(l));
+  if(headerIdx >= 0) {
+    const dataLines = rawLines.slice(headerIdx + 1);
+    for(const line of dataLines) {
+      if(!line.trim()) continue;
+      const cols = splitCSVLine(line, sep);
+      if(cols.length < 4) continue;
+      // cols[0]=date  cols[1]=desc  cols[2]=ref  cols[3]=amount  cols[4]=balance
+      const dateRaw = cols[0].trim().replace(/"/g,'');
+      const desc    = cols[1].trim().replace(/"/g,'');
+      const amtRaw  = cols[3].trim().replace(/"/g,'');
+      const dateISO = parseDateBR(dateRaw);
+      if(!dateISO) continue;
+      const val = parseBRNumber(amtRaw);
+      if(isNaN(val) || val === 0) continue;
+      // Regra automática de categoria
+      const {type, category} = autoCateg(desc, val);
+      rows.push({ date: dateISO, value: Math.abs(val), type, category, desc: desc || 'Importado' });
+    }
+    if(rows.length > 0) return rows;
+  }
+
+  // ── FORMATO NUBANK CARTÃO: date,title,amount (sem header ou com header "date,title,amount") ──
+  const nuCartaoIdx = rawLines.findIndex(l => /^date,title,amount/i.test(l.trim()));
+  const nuStart = nuCartaoIdx >= 0 ? nuCartaoIdx + 1 : 0;
+  if(nuCartaoIdx >= 0) {
+    for(const line of rawLines.slice(nuStart)) {
+      if(!line.trim()) continue;
+      const cols = splitCSVLine(line, ',');
+      if(cols.length < 3) continue;
+      const dateISO = parseDateBR(cols[0].trim().replace(/"/g,''));
+      const desc = cols[1].trim().replace(/"/g,'');
+      const val = parseBRNumber(cols[2].trim().replace(/"/g,''));
+      if(!dateISO || isNaN(val) || val === 0) continue;
+      const {type, category} = autoCateg(desc, -Math.abs(val)); // cartão = saída
+      rows.push({ date: dateISO, value: Math.abs(val), type, category, desc: desc || 'Importado' });
+    }
+    if(rows.length > 0) return rows;
+  }
+
+  // ── FORMATO GENÉRICO: qualquer CSV/TXT com data + valor ──
+  const dateRe = /(\d{2}[\/\-]\d{2}[\/\-]\d{4}|\d{4}[\/\-]\d{2}[\/\-]\d{2})/;
+  const skipRe = /saldo|balance|total|header|initial/i;
+  for(const line of rawLines) {
+    if(!line.trim() || skipRe.test(line)) continue;
+    const dMatch = line.match(dateRe);
+    if(!dMatch) continue;
+    const dateISO = parseDateBR(dMatch[1]);
+    if(!dateISO) continue;
+    const cols = splitCSVLine(line, sep);
+    let desc = '', rawAmt = '';
+    if(cols.length >= 2) {
+      desc = cols[1].replace(/"/g,'').trim();
+      // procura coluna de valor de trás pra frente
+      for(let i = cols.length - 1; i >= 1; i--) {
+        const c = cols[i].replace(/"/g,'').trim();
+        if(/^-?[\d.,]+$/.test(c) && c.length > 0) { rawAmt = c; break; }
+      }
+    }
+    if(!rawAmt) {
+      // fallback: último número signed na linha
+      const m = [...line.matchAll(/-?[\d]+[.,][\d]{2}/g)];
+      if(m.length) rawAmt = m[m.length-1][0];
+    }
+    if(!rawAmt) continue;
+    const val = parseBRNumber(rawAmt);
+    if(isNaN(val) || val === 0) continue;
+    const {type, category} = autoCateg(desc, val);
+    rows.push({ date: dateISO, value: Math.abs(val), type, category, desc: desc || 'Importado' });
+  }
+  return rows;
+}
+
+// ─── HELPERS DE PARSER ───────────────────────────────────────────────────────
+function detectSep(lines) {
+  const sample = lines.slice(0, 10).join('\n');
+  const sc = (sample.match(/;/g)||[]).length;
+  const cc = (sample.match(/,/g)||[]).length;
+  const tc = (sample.match(/\t/g)||[]).length;
+  if(sc >= cc && sc >= tc) return ';';
+  if(tc >= cc) return '\t';
+  return ',';
+}
+
+function splitCSVLine(line, sep) {
+  const result = []; let cur = ''; let inQ = false;
+  for(let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if(ch === '"') { inQ = !inQ; continue; }
+    if(ch === sep && !inQ) { result.push(cur); cur = ''; continue; }
+    cur += ch;
+  }
+  result.push(cur);
+  return result;
+}
+
+function parseDateBR(str) {
+  if(!str) return null;
+  str = str.trim().replace(/"/g,'');
+  // DD-MM-YYYY ou DD/MM/YYYY
+  let m = str.match(/^(\d{2})[\-\/](\d{2})[\-\/](\d{4})$/);
+  if(m) return `${m[3]}-${m[2]}-${m[1]}`;
+  // YYYY-MM-DD
+  m = str.match(/^(\d{4})[\-\/](\d{2})[\-\/](\d{2})$/);
+  if(m) return `${m[1]}-${m[2]}-${m[3]}`;
+  return null;
+}
+
+function parseBRNumber(str) {
+  if(!str) return NaN;
+  str = str.trim().replace(/\s/g,'').replace(/R\$/g,'');
+  // formato BR: 1.234,56 → 1234.56
+  if(str.match(/^\-?[\d.]+,\d{2}$/)) return parseFloat(str.replace(/\./g,'').replace(',','.'));
+  // formato US: 1,234.56 → 1234.56
+  if(str.match(/^\-?[\d,]+\.\d{2}$/)) return parseFloat(str.replace(/,/g,''));
+  // só número: pode ser inteiro ou decimal simples
+  return parseFloat(str.replace(',','.'));
+}
+
+// Categorização automática por palavras-chave na descrição
+function autoCateg(desc, val) {
+  const d = desc.toLowerCase();
+  const isIn = val > 0;
+  // cofrinho/savings → guardar
+  if(/cofrinho|reserva|dinheiro reservado|dinheiro retirado/i.test(desc)) return {type:'save', category: CURRENT_PROFILE==='danfer'?'caixa':'guardado'};
+  // transf interna própria
+  if(/pix enviado alex camara|ted.*propri|transf.*propri/i.test(desc)) return {type:'out', category:'outros'};
+  // receitas
+  if(isIn) {
+    if(/salario|salário|folha|pagamento emp/i.test(d)) return {type:'in', category: CURRENT_PROFILE==='danfer'?'servicos':'salario'};
+    return {type:'in', category: CURRENT_PROFILE==='danfer'?'servicos':'salario'};
+  }
+  // despesas
+  if(/uber|99 tec|taxi|gasolina|posto|estacion/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'operacional':'transporte'};
+  if(/supermercado|mercado|giassi|bistek|ifood|rappi|alimenta/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'operacional':'alimentacao'};
+  if(/amazon|shopee|magazine|submarino|americanas|loja/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'fornecedores':'lazer'};
+  if(/google|netflix|spotify|apple|youtube|disney|hbo|prime/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'equipamentos':'lazer'};
+  if(/farmacia|droga|saude|medic|clinica|hospital|dental/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'operacional':'saude'};
+  if(/fatura|cartao|credito plus|yapay|pagamento de conta/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'operacional':'outros'};
+  if(/imposto|taxa|darf|inss|fgts|receita federal/i.test(d)) return {type:'out', category: CURRENT_PROFILE==='danfer'?'impostos':'outros'};
+  return {type:'out', category: CURRENT_PROFILE==='danfer'?'operacional':'outros'};
+}
+
+const tooltip = document.getElementById('globalTooltip');
+document.addEventListener('mousemove', e => {
+  const el = e.target.closest('[data-tooltip]');
+  if(el) {
+    tooltip.textContent = el.getAttribute('data-tooltip');
+    tooltip.style.display = 'block';
+    tooltip.style.left = (e.clientX + 15) + 'px';
+    tooltip.style.top = (e.clientY + 15) + 'px';
+  } else {
+    tooltip.style.display = 'none';
+  }
+});
+
+// ─── SETTINGS ────────────────────────────────────────────────────────────────
+function toggleSettingsSection(id) {
+  const el = document.getElementById(id);
+  const caretId = 'caret' + id.replace('section','');
+  const caret = document.getElementById(caretId);
+  const hidden = el.style.display === 'none';
+  el.style.display = hidden ? '' : 'none';
+  if(caret) caret.className = hidden ? 'ph-bold ph-caret-up' : 'ph-bold ph-caret-down';
+}
+
+function saveGeminiKey() {
+  const key = document.getElementById('geminiKeyInput').value.trim();
+  if(!key) return;
+  localStorage.setItem('acefer_gemini_key', key);
+  document.getElementById('geminiKeyStatus').innerHTML = '<span style="color:var(--green)"><i class="ph-bold ph-check"></i> Chave salva com segurança no navegador.</span>';
+}
+
+function saveAccountSettings() {
+  const namePessoal = document.getElementById('settingsNamePessoal').value.trim();
+  const nameDanfer  = document.getElementById('settingsNameDanfer').value.trim();
+  const email       = document.getElementById('settingsEmail').value.trim();
+  if(namePessoal) localStorage.setItem('acefer_name_pessoal', namePessoal);
+  if(nameDanfer)  localStorage.setItem('acefer_name_danfer', nameDanfer);
+  if(email)       localStorage.setItem('acefer_email', email);
+  document.getElementById('accountSettingsStatus').innerHTML = '<span style="color:var(--green)"><i class="ph-bold ph-check"></i> Dados salvos!</span>';
+  if(nameDanfer && CURRENT_PROFILE==='danfer') document.getElementById('mainTitle').textContent = nameDanfer;
+  if(namePessoal && CURRENT_PROFILE==='pessoal') document.getElementById('mainTitle').textContent = namePessoal;
+}
+
+function confirmLogout() {
+  if(confirm('Encerrar sessão? Seus dados locais serão mantidos.')) {
+    localStorage.removeItem('acefer_theme');
+    location.reload();
+  }
+}
+
+function loadSettingsPage() {
+  const gemKey = localStorage.getItem('acefer_gemini_key');
+  if(gemKey) {
+    document.getElementById('geminiKeyInput').value = gemKey;
+    document.getElementById('geminiKeyStatus').innerHTML = '<span style="color:var(--green)"><i class="ph-bold ph-check"></i> Chave já configurada.</span>';
+  }
+  document.getElementById('settingsNamePessoal').value = localStorage.getItem('acefer_name_pessoal') || '';
+  document.getElementById('settingsNameDanfer').value  = localStorage.getItem('acefer_name_danfer') || '';
+  document.getElementById('settingsEmail').value        = localStorage.getItem('acefer_email') || '';
+  // Supabase
+  const sbUrl = localStorage.getItem('acefer_sb_url');
+  const sbKey = localStorage.getItem('acefer_sb_key');
+  if(sbUrl) document.getElementById('supabaseUrl').value = sbUrl;
+  if(sbKey) document.getElementById('supabaseKey').value = sbKey;
+  if(sbUrl && sbKey) setSyncBadge('ok', '✓ configurado');
+}
+
+function exportJSON() {
+  const data = {
+    acefer_txs: JSON.parse(localStorage.getItem('acefer_txs')||'[]'),
+    danfer_txs: JSON.parse(localStorage.getItem('danfer_txs')||'[]'),
+    exportedAt: new Date().toISOString()
+  };
+  downloadBlob(JSON.stringify(data, null, 2), 'acefer-backup-' + todayStr() + '.json', 'application/json');
+}
+
+function exportCSV() {
+  const all = [
+    ...JSON.parse(localStorage.getItem('acefer_txs')||'[]').map(t=>({...t,perfil:'pessoal'})),
+    ...JSON.parse(localStorage.getItem('danfer_txs')||'[]').map(t=>({...t,perfil:'danfer'}))
+  ];
+  const header = 'Data;Descrição;Valor;Tipo;Categoria;Perfil';
+  const lines = all.map(t => `${t.date};"${t.desc||''}";${Number(t.value).toFixed(2)};${t.type};${t.category};${t.perfil}`);
+  downloadBlob([header,...lines].join('\n'), 'acefer-relatorio-' + todayStr() + '.csv', 'text/csv');
+}
+
+function downloadSourceCode() {
+  const src = document.documentElement.outerHTML;
+  downloadBlob('<!DOCTYPE html>\n' + src, 'index.html', 'text/html');
+}
+
+function exportMarkdown() {
+  const md = `# Acefer Economy — Prompt de Contexto\n\nApp de controle financeiro pessoal e empresarial.\n\n## Perfis\n- **Pessoal (Acefer)**: controle de receitas, despesas e cofre pessoal\n- **Danfer Fotografias**: controle da empresa de fotografia\n\n## Categorias Pessoais\n- Despesas: Alimentação, Moradia, Transporte, Saúde, Lazer, Outros\n- Receitas: Salário, Outros\n- Cofre: Dinheiro Guardado\n\n## Categorias Danfer\n- Despesas: Impostos/Taxas, Fornecedores, Pró-Labore, Equipamentos/Software, Custo Operacional\n- Receitas: Vendas de Serviços, Rendimentos\n- Cofre: Caixa da Empresa\n\n## Formato CSV Suportado\nFormato Inter/Nubank: \`RELEASE_DATE;TRANSACTION_TYPE;REFERENCE_ID;TRANSACTION_NET_AMOUNT;PARTIAL_BALANCE\`\nDatas no formato DD-MM-YYYY. Valores com vírgula decimal brasileira.\n\n_Gerado em ${new Date().toLocaleString('pt-BR')}_`;
+  downloadBlob(md, 'acefer-prompt-' + todayStr() + '.md', 'text/markdown');
+}
+
+function downloadBlob(content, filename, mime) {
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+function todayStr() {
+  const d = new Date();
+  return `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+}
+
+// ─── SUPABASE SYNC ────────────────────────────────────────────────────────────
+let _sb = null; // supabase client
+
+function getSupabase() {
+  if(_sb) return _sb;
+  const url = localStorage.getItem('acefer_sb_url');
+  const key = localStorage.getItem('acefer_sb_key');
+  if(!url || !key) return null;
+  try { _sb = supabase.createClient(url, key); } catch(e) { _sb = null; }
+  return _sb;
+}
+
+function setSyncBadge(state, msg) {
+  const el = document.getElementById('syncStatusBadge');
+  if(!el) return;
+  el.className = 'sync-badge ' + state;
+  el.textContent = msg;
+}
+
+async function saveSupabaseConfig() {
+  const url = document.getElementById('supabaseUrl').value.trim();
+  const key = document.getElementById('supabaseKey').value.trim();
+  const statusEl = document.getElementById('supabaseStatus');
+  if(!url || !key) { statusEl.innerHTML = '<span style="color:var(--red)">Preencha URL e Key.</span>'; return; }
+  localStorage.setItem('acefer_sb_url', url);
+  localStorage.setItem('acefer_sb_key', key);
+  _sb = null; // reset client
+  statusEl.innerHTML = '<span style="color:var(--yellow)"><i class="ph-bold ph-spinner"></i> Conectando...</span>';
+  setSyncBadge('sync', '⟳ conectando');
+  // testa conexão criando a tabela se não existir
+  const sb = getSupabase();
+  if(!sb) { statusEl.innerHTML = '<span style="color:var(--red)">Erro ao criar cliente Supabase.</span>'; return; }
+  try {
+    const {error} = await sb.from('acefer_transactions').select('id').limit(1);
+    if(error && error.code === '42P01') {
+      statusEl.innerHTML = '<span style="color:var(--yellow)">Tabela não encontrada. Crie a tabela no Supabase (veja instruções abaixo).</span>';
+      setSyncBadge('err', 'tabela ausente');
+      showSupabaseSetupInstructions();
+      return;
+    }
+    if(error) throw error;
+    setSyncBadge('ok', '✓ conectado');
+    statusEl.innerHTML = '<span style="color:var(--green)"><i class="ph-bold ph-check"></i> Conectado! Agora sincronize os dados.</span>';
+  } catch(e) {
+    setSyncBadge('err', 'erro');
+    statusEl.innerHTML = `<span style="color:var(--red)">Erro: ${e.message}</span>`;
+  }
+}
+
+function showSupabaseSetupInstructions() {
+  const statusEl = document.getElementById('supabaseStatus');
+  statusEl.innerHTML = `
+    <div style="background:var(--surface); border:1px solid var(--border2); border-radius:8px; padding:14px; margin-top:10px; font-size:0.82rem;">
+      <strong style="color:var(--yellow)">⚠ Crie a tabela no Supabase:</strong><br><br>
+      1. Acesse seu projeto em <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--accent)">supabase.com/dashboard</a><br>
+      2. Clique em <strong>SQL Editor</strong><br>
+      3. Cole e execute este SQL:<br>
+      <pre style="background:#000; padding:10px; border-radius:6px; margin:8px 0; overflow-x:auto; font-size:0.78rem; color:#0f0;">CREATE TABLE acefer_transactions (
+  id TEXT PRIMARY KEY,
+  profile TEXT NOT NULL,
+  type TEXT,
+  value NUMERIC,
+  date TEXT,
+  category TEXT,
+  desc TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE acefer_transactions ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "public_access" ON acefer_transactions FOR ALL USING (true);</pre>
+      4. Clique em <strong>Conectar & Sincronizar</strong> novamente.
+    </div>`;
+}
+
+async function syncToCloud() {
+  const sb = getSupabase();
+  const statusEl = document.getElementById('supabaseStatus');
+  if(!sb) { statusEl && (statusEl.innerHTML = '<span style="color:var(--red)">Configure o Supabase primeiro.</span>'); return; }
+  setSyncBadge('sync', '⟳ enviando');
+  if(statusEl) statusEl.innerHTML = '<span style="color:var(--yellow)">Enviando dados...</span>';
+  try {
+    const all = [
+      ...JSON.parse(localStorage.getItem('acefer_txs')||'[]').map(t=>({...t, profile:'pessoal', id: String(t.id)})),
+      ...JSON.parse(localStorage.getItem('danfer_txs')||'[]').map(t=>({...t, profile:'danfer',  id: String(t.id)}))
+    ];
+    // upsert em lotes de 100
+    for(let i=0; i<all.length; i+=100) {
+      const batch = all.slice(i,i+100).map(t=>({ id:t.id, profile:t.profile, type:t.type, value:t.value, date:t.date, category:t.category, descricao:t.desc||'' }));
+      const {error} = await sb.from('acefer_transactions').upsert(batch, {onConflict:'id'});
+      if(error) throw error;
+    }
+    setSyncBadge('ok', '✓ sincronizado');
+    if(statusEl) statusEl.innerHTML = `<span style="color:var(--green)"><i class="ph-bold ph-check-circle"></i> ${all.length} transações enviadas para a nuvem!</span>`;
+  } catch(e) {
+    setSyncBadge('err', 'erro');
+    if(statusEl) statusEl.innerHTML = `<span style="color:var(--red)">Erro ao enviar: ${e.message}</span>`;
+  }
+}
+
+async function syncFromCloud() {
+  const sb = getSupabase();
+  const statusEl = document.getElementById('supabaseStatus');
+  if(!sb) { statusEl && (statusEl.innerHTML = '<span style="color:var(--red)">Configure o Supabase primeiro.</span>'); return; }
+  setSyncBadge('sync', '⟳ baixando');
+  if(statusEl) statusEl.innerHTML = '<span style="color:var(--yellow)">Baixando dados da nuvem...</span>';
+  try {
+    const {data, error} = await sb.from('acefer_transactions').select('*');
+    if(error) throw error;
+    const pessoal = data.filter(t=>t.profile==='pessoal').map(t=>({id:t.id, type:t.type, value:Number(t.value), date:t.date, category:t.category, desc:t.descricao||''}));
+    const danfer  = data.filter(t=>t.profile==='danfer').map(t=>({id:t.id, type:t.type, value:Number(t.value), date:t.date, category:t.category, desc:t.descricao||''}));
+    localStorage.setItem('acefer_txs', JSON.stringify(pessoal));
+    localStorage.setItem('danfer_txs', JSON.stringify(danfer));
+    loadProfileData();
+    renderApp();
+    setSyncBadge('ok', '✓ sincronizado');
+    if(statusEl) statusEl.innerHTML = `<span style="color:var(--green)"><i class="ph-bold ph-check-circle"></i> ${data.length} transações carregadas da nuvem!</span>`;
+  } catch(e) {
+    setSyncBadge('err', 'erro');
+    if(statusEl) statusEl.innerHTML = `<span style="color:var(--red)">Erro ao baixar: ${e.message}</span>`;
+  }
+}
+
+// Auto-sync após salvar transação
+async function autoSyncIfConfigured() {
+  const sb = getSupabase();
+  if(!sb) return;
+  // faz upsert silencioso das transações do perfil atual
+  try {
+    const txs = JSON.parse(localStorage.getItem(CURRENT_PROFILE==='pessoal'?'acefer_txs':'danfer_txs')||'[]');
+    if(!txs.length) return;
+    const batch = txs.map(t=>({ id:String(t.id), profile:CURRENT_PROFILE, type:t.type, value:t.value, date:t.date, category:t.category, descricao:t.desc||'' }));
+    for(let i=0; i<batch.length; i+=100) {
+      await sb.from('acefer_transactions').upsert(batch.slice(i,i+100), {onConflict:'id'});
+    }
+    setSyncBadge('ok', '✓ sincronizado');
+  } catch(e) { /* silencioso */ }
+}
+
+function clearAllData() {
+  if(confirm('ATENÇÃO: Apagar TODOS os dados? Esta ação é irreversível.')) {
+    ['acefer_txs','danfer_txs','acefer_goals','danfer_goals'].forEach(k => localStorage.removeItem(k));
+    TRANSACTIONS=[]; GOALS=[];
+    renderApp();
+  }
+}
+</script>
+</body>
+</html>
