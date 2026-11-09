@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="emerald-luxury">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>Acefer Economy</title>
+<!-- Phosphor Icons -->
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+<!-- Fontes Premium -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet"/>
+<!-- Chart.js -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+
+<style>
+/* ── PALETAS LUXURY & MINIMALIST (10 TEMAS + CUSTOM) ── */
+:root, [data-theme="emerald-luxury"] {
+  --bg: #020c08; --surface: #02110c; --bg2: #051c14; --bg3: #0a2e22; 
+  --border: #0a2e22; --border2: #1a422f;
+  --text: #e8f4ed; --text2: #84a999; --text3: #4a7561;
+  --accent: #d4af37; --accent2: #b89628; --accent-fg: #000000;
+  --green: #10b981; --green-dim: rgba(16,185,129,.15);
+  --red: #f43f5e; --red-dim: rgba(244,63,94,.15);
+  --blue: #38bdf8; --blue-dim: rgba(56,189,248,.15);
+  --amber: #fbbf24; --amber-dim: rgba(251,191,36,.15);
+  --purple: #8b5cf6; --purple-dim: rgba(139,92,246,.15);
+  --header-bg: rgba(2, 12, 8, 0.85); --sidebar-bg: #02110c; --nav-bg: rgba(2, 17, 12, 0.95);
+  --shadow: 0 4px 16px rgba(0,0,0,.4); --shadow2: 0 8px 32px rgba(0,0,0,.6);
+  --radius: 16px; --radius2: 12px; --radius3: 8px;
+  --font: 'Plus Jakarta Sans', system-ui, sans-serif; --mono: 'JetBrains Mono', monospace;
+}
+[data-theme="luma-dark"] {
+  --bg: #09090b; --surface: #121214; --bg2: #18181b; --bg3: #27272a; 
+  --border: #27272a; --border2: #3f3f46;
+  --text: #f4f4f5; --text2: #a1a1aa; --text3: #71717a;
+  --accent: #d4af37; --accent2: #b89628; --accent-fg: #000000;
+  --green: #10b981; --green-dim: rgba(16,185,129,.15);
+  --red: #ef4444; --red-dim: rgba(239,68,68,.15);
+  --blue: #3b82f6; --blue-dim: rgba(59,130,246,.15);
+  --amber: #f59e0b; --amber-dim: rgba(245,158,11,.15);
+  --purple: #8b5cf6; --purple-dim: rgba(139,92,246,.15);
+  --header-bg: rgba(9, 9, 11, 0.85); --sidebar-bg: #121214; --nav-bg: rgba(18, 18, 20, 0.95);
+  --shadow: 0 4px 16px rgba(0,0,0,.3); --shadow2: 0 8px 32px rgba(0,0,0,.5);
+}
+[data-theme="cream-beige"] {
+  --bg: #f9f8f4; --surface: #ffffff; --bg2: #f3ebd6; --bg3: #e6dfcc; 
+  --border: #e6dfcc; --border2: #d1c8b0;
+  --text: #1a1a1a; --text2: #5a5a5a; --text3: #8a8a8a;
+  --accent: #b89628; --accent2: #8c701b; --accent-fg: #ffffff;
+  --green: #059669; --green-dim: rgba(5,150,105,.15);
+  --red: #dc2626; --red-dim: rgba(220,38,38,.15);
+  --blue: #2563eb; --blue-dim: rgba(37,99,235,.15);
+  --amber: #d97706; --amber-dim: rgba(217,119,6,.15);
+  --purple: #7c3aed; --purple-dim: rgba(124,58,237,.15);
+  --header-bg: rgba(249, 248, 244, 0.85); --sidebar-bg: #f3ebd6; --nav-bg: rgba(255, 255, 255, 0.95);
+  --shadow: 0 4px 16px rgba(0,0,0,.06); --shadow2: 0 8px 32px rgba(0,0,0,.1);
+}
+[data-theme="obsidian-gold"] {
+  --bg: #050505; --surface: #0f0f0f; --bg2: #1a1a1a; --bg3: #262626;
+  --border: #262626; --border2: #404040;
+  --text: #fafafa; --text2: #a3a3a3; --text3: #737373;
+  --accent: #ffd700; --accent2: #d4af37; --accent-fg: #000000;
+  --green: #10b981; --green-dim: rgba(16,185,129,.15);
+  --red: #f43f5e; --red-dim: rgba(244,63,94,.15);
+  --header-bg: rgba(5, 5, 5, 0.85); --sidebar-bg: #0f0f0f; --nav-bg: rgba(15, 15, 15, 0.95);
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; transition: background .3s, color .3s; -webkit-tap-highlight-color: transparent; }
+
+/* ── SHIMMER GLOW METÁLICO EM HOVER & LOOP ── */
+@keyframes metallicShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.summary-card, .transaction-item, .insight-box, .chart-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s, border-color 0.25s;
+  position: relative;
+  overflow: hidden;
+}
+.summary-card:hover, .transaction-item:hover, .insight-box:hover, .chart-card:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow2), 0 0 20px rgba(212, 175, 55, 0.25);
+  border-color: var(--accent);
+}
+.summary-card::before, .insight-box::before {
+  content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(212, 175, 55, 0.25), rgba(255, 255, 255, 0.4), transparent);
+  transform: skewX(-25deg); opacity: 0; pointer-events: none; transition: opacity 0.3s;
+}
+.summary-card:hover::before, .insight-box:hover::before {
+  opacity: 1; animation: metallicShimmer 1.5s infinite linear;
+}
+
+.private-val { font-family: var(--mono); color: var(--text2); letter-spacing: 2px; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+.page { display: none; animation: fadeIn 0.35s cubic-bezier(0.16, 1, 0.3, 1); }
+.page.active { display: block; }
+
+/* ── HEADER ── */
+.app-header { background: var(--header-bg); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); padding: 0 20px; height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+.header-left { display: flex; align-items: center; gap: 12px; }
+.brand-logo-wrap { display: flex; align-items: center; gap: 10px; cursor: pointer; }
+.app-logo-icon { width: 34px; height: 34px; background: linear-gradient(135deg, #ffd700, #b89628); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #000; font-size: 20px; font-weight: 800; box-shadow: 0 0 12px rgba(212, 175, 55, 0.3); }
+.app-title { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.02em; background: linear-gradient(135deg, var(--text) 30%, var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.header-right { display: flex; align-items: center; gap: 8px; position: relative; }
+
+.icon-btn { width: 36px; height: 36px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius3); display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; color: var(--text2); font-size: 18px; }
+.icon-btn:hover { background: var(--bg3); color: var(--text); transform: scale(1.05); }
+
+/* Theme Dropdown */
+.theme-menu { position: absolute; top: 48px; right: 0; background: var(--surface); border: 1px solid var(--border2); border-radius: var(--radius2); padding: 8px; display: none; flex-direction: column; gap: 4px; z-index: 200; width: 180px; box-shadow: var(--shadow2); }
+.theme-menu.show { display: flex; animation: fadeIn 0.2s ease; }
+.theme-menu-item { padding: 8px 12px; border-radius: var(--radius3); font-size: 0.85rem; cursor: pointer; display: flex; align-items: center; justify-content: space-between; color: var(--text2); border: none; background: none; text-align: left; font-family: var(--font); }
+.theme-menu-item:hover { background: var(--bg3); color: var(--text); }
+
+/* ── LAYOUT ── */
+.app-container { display: flex; min-height: calc(100vh - 60px); }
+.sidebar-nav { width: 230px; flex-shrink: 0; background: var(--sidebar-bg); border-right: 1px solid var(--border); padding: 20px 12px; display: flex; flex-direction: column; gap: 6px; transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+.sidebar-nav.collapsed { width: 68px; }
+.sidebar-nav.collapsed .nav-text { display: none; }
+.sidebar-nav-item { display: flex; align-items: center; gap: 12px; padding: 11px 14px; border-radius: var(--radius2); cursor: pointer; color: var(--text2); font-weight: 600; font-size: 0.88rem; transition: all 0.2s; border: none; background: none; font-family: var(--font); text-align: left; width: 100%; white-space: nowrap; }
+.sidebar-nav-item:hover { background: var(--bg3); color: var(--text); }
+.sidebar-nav-item.active { background: var(--accent); color: var(--accent-fg) !important; font-weight: 700; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25); }
+.sidebar-nav-item i { font-size: 20px; flex-shrink: 0; }
+
+.content-wrapper { flex: 1; min-width: 0; }
+.main-content { padding: 24px 20px 90px; max-width: 1080px; margin: 0 auto; }
+
+/* ── CARDS & SECTIONS ── */
+.month-selector { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; background: var(--surface); padding: 10px 16px; border-radius: var(--radius2); border: 1px solid var(--border); box-shadow: var(--shadow); }
+.month-nav-btn { width: 34px; height: 34px; background: var(--bg2); border: none; border-radius: var(--radius3); cursor: pointer; transition: all 0.2s; color: var(--text); font-size: 16px; display: flex; align-items: center; justify-content: center; }
+.month-nav-btn:hover { background: var(--accent); color: var(--accent-fg); }
+.month-label { font-size: 1.05rem; font-weight: 700; letter-spacing: -0.01em; }
+
+.cards-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+@media(max-width: 650px) { .cards-grid { grid-template-columns: 1fr; } }
+.card-balance-row { grid-column: 1 / -1; }
+
+.summary-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); position: relative; }
+.summary-card.clickable { cursor: pointer; }
+.summary-card.clickable::after { content: '\e0ba'; font-family: 'Phosphor'; position: absolute; right: 20px; top: 20px; color: var(--text3); font-size: 18px; transition: color 0.2s; }
+.summary-card.clickable:hover::after { color: var(--accent); }
+
+.card-label { font-size: 0.75rem; font-weight: 700; color: var(--text3); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.card-value { font-size: 1.75rem; font-weight: 800; letter-spacing: -0.02em; font-family: var(--mono); margin-bottom: 4px; }
+.card-in .card-label i { color: var(--green); } .card-out .card-label i { color: var(--red); }
+.card-balance { background: linear-gradient(135deg, var(--surface) 0%, var(--bg2) 100%); }
+.card-balance .card-value { color: var(--accent); font-size: 2rem; }
+
+/* Collapsible Card */
+.chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; box-shadow: var(--shadow); }
+.chart-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; cursor: pointer; user-select: none; }
+.chart-card-title { font-size: 0.85rem; font-weight: 700; color: var(--text2); text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; }
+.toggle-collapse-btn { background: none; border: none; color: var(--text3); font-size: 18px; cursor: pointer; transition: transform 0.3s; display: flex; align-items: center; justify-content: center; }
+
+.chart-card.collapsed .collapsible-body { display: none; }
+.chart-card.collapsed .toggle-collapse-btn i { transform: rotate(180deg); }
+.chart-wrap { position: relative; height: 260px; width: 100%; }
+
+/* ── BUTTONS ── */
+.add-btn { background: var(--accent); color: var(--accent-fg); border: none; border-radius: var(--radius2); padding: 10px 18px; font-size: 0.85rem; font-weight: 700; cursor: pointer; font-family: var(--font); display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; box-shadow: 0 4px 12px rgba(212, 175, 55, 0.25); }
+.add-btn:hover { background: var(--accent2); transform: translateY(-2px); }
+
+.section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; margin-top: 24px; gap: 8px; flex-wrap: wrap; }
+.section-title { font-size: 1rem; font-weight: 700; color: var(--text); letter-spacing: 0.01em; display: flex; align-items: center; gap: 8px; }
+
+.transaction-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius2); padding: 14px 16px; display: flex; align-items: center; gap: 16px; margin-bottom: 8px; cursor: pointer; }
+.tx-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.tx-info { flex: 1; min-width: 0; }
+.tx-desc { font-size: 0.95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tx-meta { font-size: 0.75rem; color: var(--text3); margin-top: 4px; display: flex; align-items: center; gap: 6px; }
+.tx-amount { font-family: var(--mono); font-size: 1rem; font-weight: 700; text-align: right; flex-shrink: 0; }
+.tx-amount.in { color: var(--green); } .tx-amount.out { color: var(--text); } .tx-amount.save { color: var(--purple); }
+
+/* ── MODALS & FORMS ── */
+.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.75); backdrop-filter: blur(6px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 16px; }
+.modal-backdrop.open { display: flex; animation: fadeIn 0.25s ease; }
+.modal { background: var(--surface); border-radius: var(--radius); padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border2); box-shadow: var(--shadow2); }
+.modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+.modal-title { font-size: 1.15rem; font-weight: 700; }
+
+.form-group { margin-bottom: 16px; }
+.form-label { font-size: 0.8rem; font-weight: 600; color: var(--text2); margin-bottom: 8px; display: block; }
+.form-input, .form-select { width: 100%; padding: 12px 16px; background: var(--bg3); border: 1px solid var(--border2); border-radius: var(--radius2); color: var(--text); font-family: var(--font); font-size: 0.95rem; outline: none; transition: border 0.2s; }
+.form-input:focus, .form-select:focus { border-color: var(--accent); }
+
+.tx-type-selector { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 20px; }
+.tx-type-btn { padding: 10px; border-radius: var(--radius2); border: 1px solid var(--border2); background: var(--bg2); color: var(--text2); font-weight: 700; font-size: 0.85rem; cursor: pointer; text-align: center; transition: all 0.2s; font-family: var(--font); }
+.tx-type-btn.active.in { background: var(--green-dim); color: var(--green); border-color: var(--green); }
+.tx-type-btn.active.out { background: var(--red-dim); color: var(--red); border-color: var(--red); }
+.tx-type-btn.active.save { background: var(--purple-dim); color: var(--purple); border-color: var(--purple); }
+
+/* Bottom Nav Mobile */
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--nav-bg); backdrop-filter: blur(16px); border-top: 1px solid var(--border); display: flex; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+.nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 2px 6px; cursor: pointer; gap: 3px; color: var(--text3); font-size: 0.65rem; font-weight: 600; border: none; background: none; font-family: var(--font); }
+.nav-item i { font-size: 22px; transition: transform 0.2s; }
+.nav-item.active { color: var(--accent); }
+
+@media(min-width: 900px) { .bottom-nav { display: none; } }
+@media(max-width: 899px) { .sidebar-nav { display: none !important; } }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <header class="app-header">
+    <div class="header-left">
+      <button class="icon-btn" onclick="toggleSidebar()" data-tooltip="Recolher/Expandir Menu Lateral"><i class="ph-bold ph-list"></i></button>
+      <div class="brand-logo-wrap" onclick="showPage('dashboard')">
+        <div class="app-logo-icon">∧</div>
+        <span class="app-title">Acefer Economy</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="icon-btn" onclick="togglePrivacy()" data-tooltip="Ocultar/Exibir Valores (Modo Privacidade)"><i class="ph-bold ph-eye-slash"></i></button>
+      <button class="icon-btn" onclick="toggleThemeMenu()" data-tooltip="Alternar Temas"><i class="ph-bold ph-palette"></i></button>
+      <div id="themeMenu" class="theme-menu">
+        <button class="theme-menu-item" onclick="setTheme('emerald-luxury')">Emerald Luxury <span>✨</span></button>
+        <button class="theme-menu-item" onclick="setTheme('luma-dark')">Luma Dark <span>🌙</span></button>
+        <button class="theme-menu-item" onclick="setTheme('cream-beige')">Cream Beige <span>☀️</span></button>
+        <button class="theme-menu-item" onclick="setTheme('obsidian-gold')">Obsidian Gold <span>👑</span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-container">
+    <nav class="sidebar-nav">
+      <button class="sidebar-nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)"><i class="ph-bold ph-squares-four"></i><span class="nav-text">Visão Geral</span></button>
+      <button class="sidebar-nav-item" data-page="analysis" onclick="openAnalysis('out')"><i class="ph-bold ph-chart-line-up"></i><span class="nav-text">Análise Detalhada</span></button>
+      <button class="sidebar-nav-item" data-page="graphics" onclick="showPage('graphics', this)"><i class="ph-bold ph-chart-bar"></i><span class="nav-text">Gráficos & Dashboards</span></button>
+      <button class="sidebar-nav-item" data-page="goals" onclick="showPage('goals', this)"><i class="ph-bold ph-target"></i><span class="nav-text">Metas & Planejamento</span></button>
+      <button class="sidebar-nav-item" data-page="savings" onclick="showPage('savings', this)"><i class="ph-bold ph-piggy-bank"></i><span class="nav-text">Cofres & Guardado</span></button>
+      <button class="sidebar-nav-item" data-page="import" onclick="showPage('import', this)"><i class="ph-bold ph-file-arrow-down"></i><span class="nav-text">Importar Extrato</span></button>
+      <button class="sidebar-nav-item" data-page="settings" onclick="showPage('settings', this)"><i class="ph-bold ph-gear"></i><span class="nav-text">Configurações</span></button>
+    </nav>
+
+    <div class="content-wrapper">
+      <main class="main-content">
+        
+        <!-- ── DASHBOARD ── -->
+        <div id="page-dashboard" class="page active">
+          <div class="month-selector">
+            <button class="month-nav-btn" onclick="changeMonth(-1)"><i class="ph-bold ph-caret-left"></i></button>
+            <span class="month-label" id="monthLabelDash">—</span>
+            <button class="month-nav-btn" onclick="changeMonth(1)"><i class="ph-bold ph-caret-right"></i></button>
+          </div>
+
+          <div class="cards-grid">
+            <div class="summary-card card-in clickable" onclick="openAnalysis('in')" data-tooltip="Clique para ver análise detalhada de Receitas">
+              <div class="card-label"><i class="ph-bold ph-trend-up"></i> Receitas</div>
+              <div class="card-value" id="dashTotalIn">R$ 0,00</div>
+              <div style="font-size: 0.8rem; color: var(--text3);">Detalhamento de Entradas <i class="ph-bold ph-arrow-right"></i></div>
+            </div>
+            <div class="summary-card card-out clickable" onclick="openAnalysis('out')" data-tooltip="Clique para ver análise detalhada de Despesas">
+              <div class="card-label"><i class="ph-bold ph-trend-down"></i> Despesas</div>
+              <div class="card-value" id="dashTotalOut">R$ 0,00</div>
+              <div style="font-size: 0.8rem; color: var(--text3);">Detalhamento de Saídas <i class="ph-bold ph-arrow-right"></i></div>
+            </div>
+            <div class="summary-card card-balance card-balance-row" data-tooltip="Saldo mensal acumulado (Receitas - Despesas)">
+              <div class="card-label"><i class="ph-bold ph-wallet"></i> Saldo do Mês</div>
+              <div class="card-value" id="dashTotalBalance">R$ 0,00</div>
+            </div>
+          </div>
+
+          <div class="chart-card" id="card-dash-chart">
+            <div class="chart-card-header" onclick="toggleSection('card-dash-chart')">
+              <span class="chart-card-title"><i class="ph-bold ph-chart-bar"></i> Fluxo dos Últimos 6 Meses</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <select id="dashChartType" class="form-select" style="padding:4px 8px; font-size:0.75rem; width:auto;" onclick="event.stopPropagation()" onchange="renderDashChart()">
+                  <option value="bar">Barras Comparativas</option>
+                  <option value="line">Linha de Tendência</option>
+                </select>
+                <button class="toggle-collapse-btn" data-tooltip="Recolher / Expandir Seção"><i class="ph-bold ph-caret-up"></i></button>
+              </div>
+            </div>
+            <div class="chart-wrap collapsible-body"><canvas id="dashChartMonthly"></canvas></div>
+          </div>
+
+          <div class="section-header">
+            <span class="section-title"><i class="ph-bold ph-clock-counter-clockwise"></i> Lançamentos Recentes</span>
+            <button class="add-btn" onclick="openTxModal()" data-tooltip="Adicionar novo lançamento manual">+ Lançamento</button>
+          </div>
+          <div id="txListDash"></div>
+        </div>
+
+        <!-- ── ANÁLISE DETALHADA ── -->
+        <div id="page-analysis" class="page">
+          <button class="add-btn" style="background:var(--bg3); color:var(--text); margin-bottom:16px;" onclick="showPage('dashboard')"><i class="ph-bold ph-arrow-left"></i> Voltar ao Dashboard</button>
+          
+          <div class="section-header" style="margin-top:0;">
+            <div class="section-title" id="analysisTitle"><i class="ph-bold ph-chart-line-up"></i> Análise de Despesas</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <select id="analysisCompareMonth" class="form-select" style="padding:6px 12px; font-size:0.85rem; width:auto;" onchange="handleAnalysisMonthChange()">
+                <option value="prev">Mês Anterior</option>
+                <option value="custom">Escolher Mês do Histórico</option>
+              </select>
+              <select id="analysisCustomMonthPicker" class="form-select" style="padding:6px 12px; font-size:0.85rem; width:auto; display:none;" onchange="renderAnalysisView()"></select>
+            </div>
+          </div>
+
+          <div class="cards-grid">
+            <div class="summary-card" style="border-left: 4px solid var(--accent);" id="card-analysis-compare">
+              <div class="card-label">Comparativo com Mês de Referência</div>
+              <div class="card-value" id="analysisCompareVal">R$ 0,00</div>
+              <div style="font-size:0.8rem;" id="analysisCompareBadge">-</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid var(--purple);">
+              <div class="card-label">Média Diária no Período</div>
+              <div class="card-value" id="analysisDailyAvg">R$ 0,00</div>
+              <div style="font-size:0.8rem; color:var(--text3);">Gasto médio estimado por dia</div>
+            </div>
+          </div>
+
+          <div class="cards-grid">
+            <div class="summary-card" style="border-left: 4px solid var(--red);">
+              <div class="card-label">Maior Lançamento</div>
+              <div class="card-value" id="analysisHighestVal">R$ 0,00</div>
+              <div style="font-size:0.8rem; color:var(--text2);" id="analysisHighestName">-</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid var(--green);">
+              <div class="card-label">Menor Lançamento</div>
+              <div class="card-value" id="analysisLowestVal">R$ 0,00</div>
+              <div style="font-size:0.8rem; color:var(--text2);" id="analysisLowestName">-</div>
+            </div>
+          </div>
+
+          <div class="chart-card" id="card-analysis-chart">
+            <div class="chart-card-header" onclick="toggleSection('card-analysis-chart')">
+              <span class="chart-card-title"><i class="ph-bold ph-pie-chart"></i> Distribuição por Categoria</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <select id="analysisChartType" class="form-select" style="padding:4px 8px; font-size:0.75rem; width:auto;" onclick="event.stopPropagation()" onchange="renderAnalysisChartWithCurrent()">
+                  <option value="doughnut">Rosca (Donut)</option>
+                  <option value="pie">Pizza</option>
+                  <option value="bar">Barra Horizontal</option>
+                  <option value="line">Linha de Tendência</option>
+                  <option value="polarArea">Área Polar</option>
+                </select>
+                <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+              </div>
+            </div>
+            <div class="chart-wrap collapsible-body"><canvas id="analysisChartCat"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ── GRÁFICOS & DASHBOARDS (MULTISSELEÇÃO E COMPARATIVO) ── -->
+        <div id="page-graphics" class="page">
+          <div class="section-header" style="margin-top:0;">
+            <span class="section-title"><i class="ph-bold ph-chart-bar"></i> Visualizações & Métricas Avançadas</span>
+          </div>
+
+          <div class="chart-card" id="card-graphics-multi">
+            <div class="chart-card-header" onclick="toggleSection('card-graphics-multi')">
+              <span class="chart-card-title"><i class="ph-bold ph-sliders"></i> Análise de Categorias & Proporção Multisseleção</span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <select id="advChartStyle" class="form-select" style="padding:4px 8px; font-size:0.75rem; width:auto;" onclick="event.stopPropagation()" onchange="renderAdvChart()">
+                  <option value="line">Linha de Tendência</option>
+                  <option value="bar">Barras Comparativas</option>
+                  <option value="radar">Radar de Gastos</option>
+                </select>
+                <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+              </div>
+            </div>
+            <div class="collapsible-body">
+              <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;" id="catMultiChips"></div>
+              <div class="chart-wrap"><canvas id="advChartCanvas"></canvas></div>
+            </div>
+          </div>
+
+          <!-- Comparativo Detalhado entre Meses -->
+          <div class="chart-card" id="card-graphics-compare">
+            <div class="chart-card-header" onclick="toggleSection('card-graphics-compare')">
+              <span class="chart-card-title"><i class="ph-bold ph-arrows-left-right"></i> Comparativo Detalhado Entre 2 Meses</span>
+              <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+            </div>
+            <div class="collapsible-body">
+              <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:16px;">
+                <div>
+                  <label class="form-label">Mês A</label>
+                  <select id="compareMonthA" class="form-select" onchange="renderCategoryComparisonTable()"></select>
+                </div>
+                <div>
+                  <label class="form-label">Mês B</label>
+                  <select id="compareMonthB" class="form-select" onchange="renderCategoryComparisonTable()"></select>
+                </div>
+              </div>
+              <div id="compareTableWrap"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── METAS & PLANEJAMENTO ── -->
+        <div id="page-goals" class="page">
+          <div class="section-header" style="margin-top:0;">
+            <span class="section-title"><i class="ph-bold ph-target"></i> Metas & Planejamento Mensal</span>
+            <button class="add-btn" onclick="openGoalModal()">+ Nova Meta</button>
+          </div>
+
+          <div id="goalsListWrap"></div>
+        </div>
+
+        <!-- ── COFRES & GUARDADO ── -->
+        <div id="page-savings" class="page">
+          <div class="section-header" style="margin-top:0;">
+            <span class="section-title"><i class="ph-bold ph-piggy-bank"></i> Cofres & Histórico de Aplicações</span>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <select id="savingsPeriodFilter" class="form-select" style="padding:6px 12px; font-size:0.85rem; width:auto;" onchange="renderSavingsView()">
+                <option value="current_month">Mês Atual</option>
+                <option value="7_days">Últimos 7 dias</option>
+                <option value="10_days">Últimos 10 dias</option>
+                <option value="30_days" selected>Últimos 30 dias</option>
+                <option value="60_days">Últimos 60 dias</option>
+                <option value="90_days">Últimos 90 dias</option>
+                <option value="last_month">Mês Anterior</option>
+                <option value="year">Ano Atual</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="cards-grid">
+            <div class="summary-card" style="border-left: 4px solid var(--purple);" id="card-savings-total">
+              <div class="card-label">Total Acumulado nos Cofres</div>
+              <div class="card-value" id="savingsTotalVal">R$ 0,00</div>
+              <div style="font-size:0.8rem; color:var(--text3);">Patrimônio total guardado</div>
+            </div>
+            <div class="summary-card" style="border-left: 4px solid var(--accent);" id="card-savings-period">
+              <div class="card-label">Aportes no Período Selecionado</div>
+              <div class="card-value" id="savingsPeriodVal">R$ 0,00</div>
+              <div style="font-size:0.8rem; color:var(--text3);" id="savingsPeriodCompareBadge">-</div>
+            </div>
+          </div>
+
+          <div class="chart-card" id="card-savings-chart">
+            <div class="chart-card-header" onclick="toggleSection('card-savings-chart')">
+              <span class="chart-card-title"><i class="ph-bold ph-trend-up"></i> Comparativo & Evolução de Aportes</span>
+              <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+            </div>
+            <div class="chart-wrap collapsible-body"><canvas id="savingsChartCanvas"></canvas></div>
+          </div>
+        </div>
+
+        <!-- ── IMPORTAÇÃO ── -->
+        <div id="page-import" class="page">
+          <div class="section-header" style="margin-top:0;"><span class="section-title"><i class="ph-bold ph-upload-simple"></i> Importar Extrato Bancário</span></div>
+          <div class="chart-card" id="card-import-box">
+            <div class="chart-card-header" onclick="toggleSection('card-import-box')">
+              <span class="chart-card-title"><i class="ph-bold ph-file"></i> Arquivos Aceitos: OFX, CSV, XLSX</span>
+              <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+            </div>
+            <div class="collapsible-body">
+              <p style="font-size:0.9rem; color:var(--text2); margin-bottom: 20px;">Suporta Nubank, BTG Pactual, Itaú, Bradesco, C6 Bank, Santander, Banco do Brasil, Inter e Principais Instituições.</p>
+              <div style="border:2px dashed var(--border2); border-radius:var(--radius); padding:40px 20px; text-align:center; cursor:pointer;" onclick="document.getElementById('importFile').click()" ondragover="event.preventDefault();" ondrop="handleDrop(event)">
+                <i class="ph-duotone ph-folder-open" style="font-size: 48px; color: var(--accent); margin-bottom: 12px;"></i>
+                <h3 style="margin-bottom: 8px;">Clique ou arraste o extrato aqui</h3>
+                <p style="font-size: 0.8rem; color: var(--text3);">Leitura inteligente Regex automática</p>
+                <input type="file" id="importFile" style="display:none" accept=".ofx,.csv,.xlsx" onchange="handleFile(event)"/>
+              </div>
+            </div>
+          </div>
+          <div id="importResult" style="margin-top:20px;"></div>
+        </div>
+
+        <!-- ── CONFIGURAÇÕES AVANÇADAS ── -->
+        <div id="page-settings" class="page">
+          <div class="section-header" style="margin-top:0;"><span class="section-title"><i class="ph-bold ph-gear"></i> Configurações do Sistema</span></div>
+          
+          <!-- Nova Seção da API do Gemini -->
+          <div class="chart-card" id="card-settings-gemini">
+            <div class="chart-card-header" onclick="toggleSection('card-settings-gemini')">
+              <span class="chart-card-title"><i class="ph-bold ph-sparkle" style="color:var(--accent);"></i> Inteligência Artificial (API Google Gemini)</span>
+              <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+            </div>
+            <div class="collapsible-body">
+              <p style="font-size:0.85rem; color:var(--text2); margin-bottom:12px;">
+                Conecte sua chave gratuita do <b>Google Gemini</b> para habilitar a <b>Aura</b>, sua agente de inteligência financeira pessoal.
+              </p>
+              <div class="form-group">
+                <label class="form-label">Chave de API do Gemini (Google AI Studio)</label>
+                <input type="password" id="geminiApiKeyInput" class="form-input" placeholder="AIzaSy..."/>
+              </div>
+              <div style="display:flex; gap:8px; align-items:center;">
+                <button class="add-btn" onclick="saveGeminiApiKey()">Salvar Chave</button>
+                <a href="https://aistudio.google.com/" target="_blank" style="font-size:0.8rem; color:var(--accent); text-decoration:underline;">Obter chave gratuita no Google AI Studio</a>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card" id="card-settings-account">
+            <div class="chart-card-header" onclick="toggleSection('card-settings-account')">
+              <span class="chart-card-title"><i class="ph-bold ph-user-gear"></i> Conta & Perfil de Acesso</span>
+              <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+            </div>
+            <div class="collapsible-body">
+              <div class="form-group">
+                <label class="form-label">E-mail do Usuário</label>
+                <input type="email" class="form-input" value="alex@acefer.com"/>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Alterar Senha</label>
+                <input type="password" class="form-input" placeholder="Nova Senha..."/>
+              </div>
+              <div style="display:flex; gap:8px;">
+                <button class="add-btn" onclick="alert('Perfil salvo com sucesso!')">Salvar Alterações</button>
+                <button class="add-btn" style="background:var(--red-dim); color:var(--red);" onclick="alert('Sessão encerrada.')">Encerrar Sessão (Sair)</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="chart-card" id="card-settings-backup">
+            <div class="chart-card-header" onclick="toggleSection('card-settings-backup')">
+              <span class="chart-card-title"><i class="ph-bold ph-download-simple"></i> Central de Backup, Exportação & Automação</span>
+              <button class="toggle-collapse-btn"><i class="ph-bold ph-caret-up"></i></button>
+            </div>
+            <div class="collapsible-body">
+              <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="add-btn" style="background:var(--bg3); color:var(--text);" onclick="exportDataJSON()"><i class="ph-bold ph-file-js"></i> Exportar Todos os Dados (JSON)</button>
+                <button class="add-btn" style="background:var(--bg3); color:var(--text);" onclick="exportDataCSV()"><i class="ph-bold ph-file-csv"></i> Exportar Relatório Detalhado (CSV)</button>
+                <button class="add-btn" style="background:var(--bg3); color:var(--text);" onclick="downloadSourceHTML()"><i class="ph-bold ph-code"></i> Baixar Código Fonte Completo (index.html)</button>
+                <button class="add-btn" style="background:var(--bg3); color:var(--text);" onclick="downloadAutomationPrompt()"><i class="ph-bold ph-file-text"></i> Baixar Prompt de Engenharia / Automação (.md)</button>
+                <button class="add-btn" style="background:var(--red-dim); color:var(--red);" onclick="clearData()"><i class="ph-bold ph-trash"></i> Resetar Todos os Dados do App</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-page="dashboard" onclick="showPage('dashboard', this)"><i class="ph-bold ph-squares-four"></i> Dashboard</button>
+    <button class="nav-item" data-page="graphics" onclick="showPage('graphics', this)"><i class="ph-bold ph-chart-bar"></i> Gráficos</button>
+    <button class="nav-item" data-page="savings" onclick="showPage('savings', this)"><i class="ph-bold ph-piggy-bank"></i> Cofres</button>
+    <button class="nav-item" data-page="import" onclick="showPage('import', this)"><i class="ph-bold ph-upload-simple"></i> Importar</button>
+  </nav>
+</div>
+
+<!-- Widget Flutuante e Card Compacto da Agente IA AURA -->
+<div id="auraWidgetContainer" style="position:fixed; bottom:80px; right:20px; z-index:250; display:flex; flex-direction:column; align-items:flex-end; gap:10px;">
+  
+  <!-- Card de Chat Retrátil (Aparece ao clicar no ícone) -->
+  <div id="auraChatCard" style="display:none; width:340px; max-width:90vw; height:440px; background:var(--surface); border:1px solid var(--border2); border-radius:var(--radius); box-shadow:var(--shadow2); flex-direction:column; overflow:hidden; animation: fadeIn 0.2s ease;">
+    <!-- Cabeçalho do Character -->
+    <div style="background:var(--bg2); padding:12px 16px; border-bottom:1px solid var(--border); display:flex; align-items:center; justify-content:space-between;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg, #ffd700, #b89628); color:#000; font-weight:800; display:flex; align-items:center; justify-content:center; font-size:18px; border:2px solid var(--accent);">AU</div>
+        <div>
+          <span style="font-size:0.9rem; font-weight:700; color:var(--text); display:block;">Aura (Consultora IA)</span>
+          <span style="font-size:0.7rem; color:var(--green); display:flex; align-items:center; gap:4px;"><span style="width:6px; height:6px; background:var(--green); border-radius:50%; display:inline-block;"></span> Online & Analisando</span>
+        </div>
+      </div>
+      <button class="icon-btn" style="width:28px; height:28px; font-size:14px;" onclick="toggleAuraChat()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    
+    <!-- Mensagens do Chat -->
+    <div id="auraChatMessages" style="flex:1; overflow-y:auto; padding:12px; display:flex; flex-direction:column; gap:10px; font-size:0.85rem;">
+      <div style="background:var(--bg2); padding:10px 14px; border-radius:var(--radius2); border:1px solid var(--border); color:var(--text); line-height:1.4;">
+        Olá, Alex! Sou a <b>Aura</b>, sua consultora financeira pessoal. Como posso ajudar com suas metas e despesas hoje?
+      </div>
+    </div>
+    
+    <!-- Input de Mensagem -->
+    <div style="padding:10px; background:var(--bg2); border-top:1px solid var(--border); display:flex; gap:6px;">
+      <input type="text" id="auraInput" class="form-input" placeholder="Pergunte à Aura..." style="padding:8px 12px; font-size:0.85rem;" onkeydown="if(event.key==='Enter') sendAuraMessage()"/>
+      <button class="add-btn" style="padding:8px 12px;" onclick="sendAuraMessage()"><i class="ph-bold ph-paper-plane-right"></i></button>
+    </div>
+  </div>
+
+  <!-- Botão Flutuante com o Avatar/Character (Ícone do Chat com a Imagem Dourada) -->
+  <div id="auraFab" onclick="toggleAuraChat()" data-tooltip="Conversar com a Aura (Consultora IA)" style="width:56px; height:56px; border-radius:50%; overflow:hidden; cursor:pointer; box-shadow:0 6px 20px rgba(212,175,55,0.4); border:2px solid var(--accent); transition:transform 0.2s; display:flex; align-items:center; justify-content:center; background:#000;">
+    <img src="c04da3b01ed4246fa4055db6eb4268a5.jpg" alt="Aura IA" style="width:100%; height:100%; object-fit:cover;" onerror="this.onerror=null;this.src='https://placehold.co/100x100/121214/d4af37?text=AU';"/>
+  </div>
+</div>
+
+<!-- Modal Nova Meta -->
+<div id="goalModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Nova Meta Mensal</span>
+      <button class="icon-btn" onclick="closeGoalModal()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <form onsubmit="saveGoal(event)">
+      <div class="form-group">
+        <label class="form-label">Mês / Ano</label>
+        <div style="display:flex; gap:8px;">
+          <select id="goalMonth" class="form-select"></select>
+          <input type="number" id="goalYear" class="form-input" value="2026"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Tipo de Meta</label>
+        <select id="goalType" class="form-select">
+          <option value="out">Teto de Despesas (Não Gastar Mais Que)</option>
+          <option value="in">Meta de Receita (Alcançar)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor Alvo (R$)</label>
+        <input type="number" step="0.01" id="goalVal" class="form-input" placeholder="2000.00" required/>
+      </div>
+      <button type="submit" class="add-btn" style="width:100%; justify-content:center;">Salvar Meta</button>
+    </form>
+  </div>
+</div>
+
+<!-- Modal Novo Lançamento -->
+<div id="txModal" class="modal-backdrop">
+  <div class="modal">
+    <div class="modal-header">
+      <span class="modal-title">Novo Lançamento</span>
+      <button class="icon-btn" onclick="closeTxModal()"><i class="ph-bold ph-x"></i></button>
+    </div>
+    <form onsubmit="saveTx(event)">
+      <div class="tx-type-selector">
+        <button type="button" class="tx-type-btn active in" id="btnTypeIn" onclick="setTxType('in')"><i class="ph-bold ph-trend-up"></i> Receita</button>
+        <button type="button" class="tx-type-btn out" id="btnTypeOut" onclick="setTxType('out')"><i class="ph-bold ph-trend-down"></i> Despesa</button>
+        <button type="button" class="tx-type-btn save" id="btnTypeSave" onclick="setTxType('save')"><i class="ph-bold ph-piggy-bank"></i> Guardado</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Descrição</label>
+        <input type="text" id="txDesc" class="form-input" placeholder="Ex: Mercado, Salário, CDB..." required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Valor (R$)</label>
+        <input type="number" step="0.01" id="txVal" class="form-input" placeholder="0.00" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Data</label>
+        <input type="date" id="txDate" class="form-input" required/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Categoria</label>
+        <select id="txCategory" class="form-select" required></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Atribuir a</label>
+        <select id="txPerson" class="form-select">
+          <option value="me">Alex</option>
+          <option value="spouse">Diana</option>
+        </select>
+      </div>
+      <button type="submit" class="add-btn" style="width:100%; justify-content:center; margin-top:12px;">Adicionar Lançamento</button>
+    </form>
+  </div>
+</div>
+
+<script>
+// ── ESTADO GLOBAL DA APLICAÇÃO ──
+let privacyMode = false;
+let currentMonth = 10; // Novembro (0-index)
+let currentYear = 2026;
+let selectedAnalysisPeriod = 'out';
+let modalType = 'in';
+
+let dashChart = null;
+let analysisChart = null;
+let savingsChart = null;
+let advChart = null;
+let geminiApiKey = localStorage.getItem('acefer_gemini_api_key') || '';
+let selectedCategories = ['alimentacao', 'moradia', 'transporte'];
+let collapsedSections = JSON.parse(localStorage.getItem('acefer_collapsed_sections') || '{}');
+
+const MONTHS = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+const CAT_OUT = [
+  {id:'alimentacao', label:'Alimentação', icon:'ph-shopping-cart', color:'#f59e0b'},
+  {id:'moradia', label:'Moradia', icon:'ph-house', color:'#ef4444'},
+  {id:'transporte', label:'Transporte', icon:'ph-car', color:'#14b8a6'},
+  {id:'saude', label:'Saúde', icon:'ph-heartbeat', color:'#ec4899'},
+  {id:'lazer', label:'Lazer', icon:'ph-game-controller', color:'#06b6d4'},
+  {id:'outros', label:'Outros', icon:'ph-dots-three-circle', color:'#94a3b8'}
+];
+
+const CAT_IN = [
+  {id:'salario', label:'Salário', icon:'ph-briefcase', color:'#10b981'},
+  {id:'investimento', label:'Investimento', icon:'ph-trend-up', color:'#f59e0b'},
+  {id:'outros_in', label:'Outros', icon:'ph-money', color:'#94a3b8'}
+];
+
+const CAT_SAVE = [
+  {id:'resgate', label:'Resgate / Guardado', icon:'ph-piggy-bank', color:'#8b5cf6'}
+];
+
+let TRANSACTIONS = JSON.parse(localStorage.getItem('acefer_transactions') || 'null') || [
+  {id:1, type:'in', value: 5500, date:'2026-11-05', category:'salario', desc:'Salário Mensal', person:'me'},
+  {id:2, type:'out', value: 1200, date:'2026-11-06', category:'moradia', desc:'Aluguel', person:'me'},
+  {id:3, type:'out', value: 350, date:'2026-11-08', category:'alimentacao', desc:'Mercado', person:'me'},
+  {id:4, type:'out', value: 120, date:'2026-11-10', category:'transporte', desc:'Uber', person:'spouse'},
+  {id:5, type:'in', value: 800, date:'2026-11-12', category:'investimento', desc:'Dividendos', person:'me'},
+  {id:6, type:'save', value: 500, date:'2026-11-14', category:'resgate', desc:'Resgate CDB / Caixinha', person:'me'},
+  {id:7, type:'out', value: 900, date:'2026-10-06', category:'moradia', desc:'Aluguel', person:'me'},
+  {id:8, type:'out', value: 400, date:'2026-10-08', category:'alimentacao', desc:'Mercado', person:'me'},
+  {id:9, type:'in', value: 5500, date:'2026-10-05', category:'salario', desc:'Salário Mensal', person:'me'}
+];
+
+// FORMATADORES E UTILS
+const formatBRL = (n) => 'R$ ' + Number(n||0).toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+const pv = (val) => privacyMode ? '<span class="private-val">R$ *******</span>' : val;
+
+function saveStorage() {
+  localStorage.setItem('acefer_transactions', JSON.stringify(TRANSACTIONS));
+}
+
+function togglePrivacy() {
+  privacyMode = !privacyMode;
+  renderApp();
+  renderSavingsView();
+}
+
+function toggleThemeMenu() {
+  const menu = document.getElementById('themeMenu');
+  if(menu) menu.classList.toggle('show');
+}
+
+function setTheme(themeName) {
+  document.documentElement.setAttribute('data-theme', themeName);
+  const menu = document.getElementById('themeMenu');
+  if(menu) menu.classList.remove('show');
+  renderApp();
+}
+
+function changeMonth(dir) {
+  currentMonth += dir;
+  if(currentMonth > 11) { currentMonth = 0; currentYear++; }
+  if(currentMonth < 0) { currentMonth = 11; currentYear--; }
+  renderApp();
+}
+
+function toggleSidebar() {
+  const sidebar = document.querySelector('.sidebar-nav');
+  if(sidebar) sidebar.classList.toggle('collapsed');
+}
+
+function toggleSection(sectionId) {
+  const card = document.getElementById(sectionId);
+  if(!card) return;
+  card.classList.toggle('collapsed');
+  collapsedSections[sectionId] = card.classList.contains('collapsed');
+  localStorage.setItem('acefer_collapsed_sections', JSON.stringify(collapsedSections));
+}
+
+function deleteTx(id) {
+  if (confirm('Deseja realmente excluir este lançamento?')) {
+    TRANSACTIONS = TRANSACTIONS.filter(t => t.id !== id);
+    saveStorage();
+    renderApp();
+  }
+}
+
+function openTxModal() {
+  const modal = document.getElementById('txModal');
+  if(modal) modal.classList.add('open');
+  setTxType('in');
+  const today = new Date().toISOString().split('T')[0];
+  const dateInput = document.getElementById('txDate');
+  if(dateInput) dateInput.value = today;
+}
+
+function closeTxModal() {
+  const modal = document.getElementById('txModal');
+  if(modal) modal.classList.remove('open');
+}
+
+function setTxType(type) {
+  modalType = type;
+  document.querySelectorAll('.tx-type-btn').forEach(b => b.classList.remove('active', 'in', 'out', 'save'));
+  const btn = document.getElementById('btnType' + (type === 'in' ? 'In' : type === 'out' ? 'Out' : 'Save'));
+  if(btn) btn.classList.add('active', type);
+
+  const catSelect = document.getElementById('txCategory');
+  if(catSelect) {
+    let list = CAT_OUT;
+    if(type === 'in') list = CAT_IN;
+    if(type === 'save') list = CAT_SAVE;
+    catSelect.innerHTML = list.map(c => `<option value="${c.id}">${c.label}</option>`).join('');
+  }
+}
+
+function saveTx(e) {
+  e.preventDefault();
+  const desc = document.getElementById('txDesc').value;
+  const value = parseFloat(document.getElementById('txVal').value);
+  const date = document.getElementById('txDate').value;
+  const category = document.getElementById('txCategory').value;
+  const person = document.getElementById('txPerson').value;
+
+  if(!isNaN(value) && date) {
+    const newTx = {
+      id: Date.now(),
+      type: modalType,
+      value,
+      date,
+      category,
+      desc,
+      person
+    };
+    TRANSACTIONS.push(newTx);
+    saveStorage();
+    closeTxModal();
+    renderApp();
+  }
+}
+
+function renderSavingsView() {
+  const totalSave = TRANSACTIONS.filter(t => t.type === 'save').reduce((s,t) => s + t.value, 0);
+  const totalSaveEl = document.getElementById('savingsTotalVal');
+  if(totalSaveEl) totalSaveEl.innerHTML = pv(formatBRL(totalSave));
+
+  const periodSaveEl = document.getElementById('savingsPeriodVal');
+  if(periodSaveEl) periodSaveEl.innerHTML = pv(formatBRL(totalSave));
+
+  const canvas = document.getElementById('savingsChartCanvas');
+  if(canvas) {
+    const ctx = canvas.getContext('2d');
+    if(savingsChart) savingsChart.destroy();
+
+    const labels = [];
+    const data = [];
+    for(let i = 5; i >= 0; i--) {
+      let m = currentMonth - i;
+      let y = currentYear;
+      if(m < 0) { m += 12; y--; }
+      labels.push(MONTHS[m].slice(0, 3));
+      const sum = TRANSACTIONS.filter(t => {
+        const d = new Date(t.date + 'T12:00:00');
+        return t.type === 'save' && d.getMonth() === m && d.getFullYear() === y;
+      }).reduce((s,t) => s + t.value, 0);
+      data.push(sum);
+    }
+
+    savingsChart = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [{
+          label: 'Guardado no Mês',
+          data,
+          backgroundColor: '#8b5cf6',
+          borderRadius: 6
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { labels: { color: '#a1a1aa' } },
+          tooltip: { callbacks: { label: c => privacyMode ? ' R$ *******' : ' ' + formatBRL(c.raw) } }
+        },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#a1a1aa' } },
+          y: { grid: { color: 'rgba(128,128,128,0.1)' }, ticks: { color: '#a1a1aa', callback: v => privacyMode ? 'R$ *******' : 'R$ ' + v } }
+        }
+      }
+    });
+  }
+}
+
+// ── RENDERIZAÇÃO DE GRÁFICOS AVANÇADOS (MULTISSELEÇÃO & COMPARATIVO) ──
+function renderGraphicsView() {
+  const chipsWrap = document.getElementById('catMultiChips');
+  if(chipsWrap) {
+    chipsWrap.innerHTML = CAT_OUT.map(c => {
+      const active = selectedCategories.includes(c.id);
+      return `<button type="button" onclick="toggleCatSelection('${c.id}')" style="padding:6px 12px; border-radius:99px; border:1px solid ${active ? c.color : 'var(--border2)'}; background:${active ? c.color+'33' : 'var(--bg2)'}; color:${active ? c.color : 'var(--text2)'}; font-size:0.8rem; font-weight:700; cursor:pointer; display:flex; align-items:center; gap:6px;">
+        <i class="ph ${c.icon}"></i> ${c.label} ${active ? '✓' : ''}
+      </button>`;
+    }).join('');
+  }
+  renderAdvChart();
+  
+  const mOptions = MONTHS.map((m,i)=>`<option value="${i}">${m} ${currentYear}</option>`).join('');
+  const mA = document.getElementById('compareMonthA');
+  const mB = document.getElementById('compareMonthB');
+  if(mA && mB && !mA.innerHTML) {
+    mA.innerHTML = mOptions;
+    mB.innerHTML = mOptions;
+    if(currentMonth > 0) mB.value = currentMonth - 1;
+    renderCategoryComparisonTable();
+  }
+}
+
+function toggleCatSelection(catId) {
+  if(selectedCategories.includes(catId)) {
+    selectedCategories = selectedCategories.filter(id => id !== catId);
+  } else {
+    selectedCategories.push(catId);
+  }
+  renderGraphicsView();
+}
+
+function renderAdvChart() {
+  const canvas = document.getElementById('advChartCanvas');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if(advChart) advChart.destroy();
+
+  const styleSel = document.getElementById('advChartStyle');
+  const chartType = styleSel ? styleSel.value : 'line';
+
+  const labels = [];
+  for(let i=5; i>=0; i--) {
+    let m = currentMonth - i, y = currentYear;
+    if(m<0) { m+=12; y--; }
+    labels.push(MONTHS[m].slice(0,3));
+  }
+
+  const datasets = selectedCategories.map(cId => {
+    const cat = CAT_OUT.find(c => c.id === cId) || {label: cId, color: '#d4af37'};
+    const data = [];
+    for(let i=5; i>=0; i--) {
+      let m = currentMonth - i, y = currentYear;
+      if(m<0) { m+=12; y--; }
+      const sum = TRANSACTIONS.filter(t => {
+        const d = new Date(t.date+'T12:00');
+        return t.type === 'out' && t.category === cId && d.getMonth()===m && d.getFullYear()===y;
+      }).reduce((s,t)=>s+t.value, 0);
+      data.push(sum);
+    }
+    return {
+      label: cat.label,
+      data,
+      backgroundColor: cat.color + '44',
+      borderColor: cat.color,
+      borderWidth: 2,
+      tension: 0.4,
+      fill: chartType === 'line'
+    };
+  });
+
+  advChart = new Chart(ctx, {
+    type: chartType === 'radar' ? 'radar' : chartType === 'bar' ? 'bar' : 'line',
+    data: { labels, datasets },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#a1a1aa' } },
+        tooltip: { callbacks: { label: c => privacyMode ? ' R$ *******' : ` ${c.dataset.label}: ${formatBRL(c.raw)}` } }
+      },
+      scales: chartType === 'radar' ? {} : {
+        x: { grid: {display:false}, ticks: {color: '#a1a1aa'} },
+        y: { grid: {color: 'rgba(128,128,128,0.1)'}, ticks: {color: '#a1a1aa', callback: v => privacyMode ? 'R$ *******' : 'R$ '+v} }
+      }
+    }
+  });
+}
+
+function renderCategoryComparisonTable() {
+  const mA = parseInt(document.getElementById('compareMonthA')?.value || currentMonth);
+  const mB = parseInt(document.getElementById('compareMonthB')?.value || (currentMonth > 0 ? currentMonth - 1 : 11));
+  const wrap = document.getElementById('compareTableWrap');
+  if(!wrap) return;
+
+  const getCatTotals = (m) => {
+    const map = {};
+    CAT_OUT.forEach(c => map[c.id] = 0);
+    TRANSACTIONS.forEach(t => {
+      const d = new Date(t.date+'T12:00');
+      if(t.type === 'out' && d.getMonth() === m && d.getFullYear() === currentYear) {
+        map[t.category] = (map[t.category] || 0) + t.value;
+      }
+    });
+    return map;
+  };
+
+  const totalsA = getCatTotals(mA);
+  const totalsB = getCatTotals(mB);
+
+  let html = `<table style="width:100%; border-collapse:collapse; font-size:0.85rem;">
+    <thead>
+      <tr style="border-bottom:1px solid var(--border); color:var(--text3); text-align:left;">
+        <th style="padding:8px;">Categoria</th>
+        <th style="padding:8px;">${MONTHS[mA]}</th>
+        <th style="padding:8px;">${MONTHS[mB]}</th>
+        <th style="padding:8px;">Variação</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  CAT_OUT.forEach(c => {
+    const valA = totalsA[c.id] || 0;
+    const valB = totalsB[c.id] || 0;
+    const diff = valA - valB;
+    const pct = valB > 0 ? (diff / valB * 100).toFixed(1) : (valA > 0 ? 100 : 0);
+    const color = diff > 0 ? 'var(--red)' : diff < 0 ? 'var(--green)' : 'var(--text3)';
+    const sign = diff > 0 ? '+' : '';
+
+    html += `<tr style="border-bottom:1px solid var(--border);">
+      <td style="padding:10px; font-weight:600; display:flex; align-items:center; gap:6px;"><i class="ph ${c.icon}" style="color:${c.color}"></i> ${c.label}</td>
+      <td style="padding:10px; font-family:var(--mono);">${pv(formatBRL(valA))}</td>
+      <td style="padding:10px; font-family:var(--mono);">${pv(formatBRL(valB))}</td>
+      <td style="padding:10px; font-family:var(--mono); color:${color};">${sign}${formatBRL(diff)} (${pct}%)</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+  wrap.innerHTML = html;
+}
+
+function exportDataJSON() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(TRANSACTIONS, null, 2));
+  const dlAnchor = document.createElement('a');
+  dlAnchor.setAttribute("href", dataStr);
+  dlAnchor.setAttribute("download", "acefer_economy_backup.json");
+  document.body.appendChild(dlAnchor);
+  dlAnchor.click();
+  dlAnchor.remove();
+}
+
+function exportDataCSV() {
+  let csv = 'ID,Tipo,Valor,Data,Categoria,Descricao,Pessoa\n';
+  TRANSACTIONS.forEach(t => {
+    csv += `${t.id},${t.type},${t.value},${t.date},${t.category},"${t.desc || ''}",${t.person}\n`;
+  });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const dl = document.createElement('a');
+  dl.setAttribute('href', url);
+  dl.setAttribute('download', 'acefer_economy_relatorio.csv');
+  document.body.appendChild(dl);
+  dl.click();
+  dl.remove();
+}
+
+function downloadSourceHTML() {
+  const htmlContent = document.documentElement.outerHTML;
+  const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const dl = document.createElement('a');
+  dl.setAttribute('href', url);
+  dl.setAttribute('download', 'index.html');
+  document.body.appendChild(dl);
+  dl.click();
+  dl.remove();
+}
+
+function downloadAutomationPrompt() {
+  const promptText = `# Prompt de Engenharia / Automação - Acefer Economy\n\nAplicativo financeiro pessoal de alto padrão, desenvolvido com arquitetura Single-File (HTML, Tailwind CSS, Phosphor Icons, Chart.js e integração nativa com Gemini AI).`;
+  const blob = new Blob([promptText], { type: 'text/markdown;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const dl = document.createElement('a');
+  dl.setAttribute('href', url);
+  dl.setAttribute('download', 'prompt_criacao_app.md');
+  document.body.appendChild(dl);
+  dl.click();
+  dl.remove();
+}
+
+function clearData() {
+  if (confirm('Tem certeza absoluta que deseja resetar todos os dados?')) {
+    TRANSACTIONS = [];
+    saveStorage();
+    renderApp();
+    alert('Dados limpos com sucesso.');
+  }
+}
+
+function getCatInfo(type, catId) {
+  let list = CAT_OUT;
+  if (type === 'in') list = CAT_IN;
+  if (type === 'save') list = CAT_SAVE;
+  return list.find(c => c.id === catId) || {label: catId, icon: 'ph-question', color: '#94a3b8'};
+}
+
+function renderApp() {
+  const monthName = MONTHS[currentMonth];
+  const labelDash = document.getElementById('monthLabelDash');
+  if(labelDash) labelDash.textContent = `${monthName} ${currentYear}`;
+
+  const currentTxs = TRANSACTIONS.filter(t => {
+    const d = new Date(t.date + 'T12:00:00');
+    return d.getMonth() === currentMonth && d.getFullYear() === currentYear;
+  });
+
+  const totalIn = currentTxs.filter(t => t.type === 'in').reduce((s,t) => s + t.value, 0);
+  const totalOut = currentTxs.filter(t => t.type === 'out').reduce((s,t) => s + t.value, 0);
+  const balance = totalIn - totalOut;
+
+  const inEl = document.getElementById('dashTotalIn');
+  if(inEl) inEl.innerHTML = pv(formatBRL(totalIn));
+
+  const outEl = document.getElementById('dashTotalOut');
+  if(outEl) outEl.innerHTML = pv(formatBRL(totalOut));
+
+  const balEl = document.getElementById('dashTotalBalance');
+  if(balEl) {
+    balEl.innerHTML = pv(formatBRL(balance));
+    balEl.style.color = balance >= 0 ? 'var(--accent)' : 'var(--red)';
+  }
+
+  const listEl = document.getElementById('txListDash');
+  if(listEl) {
+    listEl.innerHTML = currentTxs.sort((a,b)=>b.date.localeCompare(a.date)).slice(0, 5).map(t => {
+      const cat = getCatInfo(t.type, t.category);
+      const bgc = t.type === 'in' ? 'var(--green-dim)' : t.type === 'out' ? 'var(--red-dim)' : 'var(--purple-dim)';
+      const cColor = t.type === 'in' ? 'var(--green)' : t.type === 'out' ? 'var(--red)' : 'var(--purple)';
+      const sign = t.type === 'in' ? '+' : t.type === 'out' ? '-' : '🐷 ';
+      return `<div class="transaction-item" data-tooltip="Lançamento registrado">
+        <div class="tx-icon" style="background:${bgc}; color:${cColor}"><i class="ph ${cat.icon}"></i></div>
+        <div class="tx-info"><div class="tx-desc">${t.desc || cat.label}</div><div class="tx-meta">${t.date.split('-').reverse().join('/')} · ${cat.label} · ${t.person === 'me' ? 'Alex' : 'Diana'}</div></div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div class="tx-amount ${t.type}">${pv(sign + formatBRL(t.value))}</div>
+          <button class="icon-btn" style="width:30px; height:30px; color:var(--red); border-color:var(--red-dim);" onclick="deleteTx(${t.id})" data-tooltip="Excluir lançamento"><i class="ph-bold ph-trash"></i></button>
+        </div>
+      </div>`;
+    }).join('') || '<div style="color:var(--text3); font-size:0.9rem; text-align:center; padding:20px;">Nenhum lançamento neste mês.</div>';
+  }
+
+  renderDashChart();
+}
+
+function renderDashChart() {
+  const canvas = document.getElementById('dashChartMonthly');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if(dashChart) dashChart.destroy();
+
+  const chartTypeSelect = document.getElementById('dashChartType');
+  const type = chartTypeSelect ? chartTypeSelect.value : 'bar';
+
+  const labels = [], ins = [], outs = [];
+  for(let i=5; i>=0; i--) {
+    let m = currentMonth - i, y = currentYear;
+    if(m<0) { m+=12; y--; }
+    labels.push(MONTHS[m].slice(0,3));
+    const mtxs = TRANSACTIONS.filter(t => new Date(t.date+'T12:00').getMonth()===m && new Date(t.date+'T12:00').getFullYear()===y);
+    ins.push(mtxs.filter(t=>t.type==='in').reduce((s,t)=>s+t.value,0));
+    outs.push(mtxs.filter(t=>t.type==='out').reduce((s,t)=>s+t.value,0));
+  }
+
+  dashChart = new Chart(ctx, {
+    type: type === 'line' ? 'line' : 'bar',
+    data: {
+      labels,
+      datasets: [
+        { label: 'Receitas', data: ins, backgroundColor: 'rgba(16, 185, 129, 0.2)', borderColor: '#10b981', borderWidth: 2.5, tension: 0.4, fill: type === 'line' },
+        { label: 'Despesas', data: outs, backgroundColor: 'rgba(244, 63, 94, 0.2)', borderColor: '#f43f5e', borderWidth: 2.5, tension: 0.4, fill: type === 'line' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { labels: { color: '#a1a1aa' } },
+        tooltip: { callbacks: { label: c => privacyMode ? ' R$ *******' : ` ${c.dataset.label}: ${formatBRL(c.raw)}` } }
+      },
+      scales: {
+        x: { grid: {display:false}, ticks: {color: '#a1a1aa'} },
+        y: { grid: {color: 'rgba(128,128,128,0.1)'}, ticks: {color: '#a1a1aa', callback: v => privacyMode ? 'R$ *******' : 'R$ '+v} }
+      }
+    }
+  });
+}
+
+function openAnalysis(type) {
+  selectedAnalysisPeriod = type;
+  showPage('analysis');
+}
+
+function renderAnalysisView() {
+  const isOut = selectedAnalysisPeriod === 'out';
+  const titleEl = document.getElementById('analysisTitle');
+  if(titleEl) titleEl.innerHTML = isOut ? `<i class="ph-bold ph-trend-down" style="color:var(--red)"></i> Análise de Despesas` : `<i class="ph-bold ph-trend-up" style="color:var(--green)"></i> Análise de Receitas`;
+
+  const curTxs = TRANSACTIONS.filter(t => t.type === selectedAnalysisPeriod && new Date(t.date+'T12:00').getMonth()===currentMonth && new Date(t.date+'T12:00').getFullYear()===currentYear);
+  const curTotal = curTxs.reduce((s,t)=>s+t.value, 0);
+
+  const compareValEl = document.getElementById('analysisCompareVal');
+  if(compareValEl) compareValEl.innerHTML = pv(formatBRL(curTotal));
+
+  const dailyAvgEl = document.getElementById('analysisDailyAvg');
+  if(dailyAvgEl) dailyAvgEl.innerHTML = pv(formatBRL(curTotal / 30));
+
+  if(curTxs.length > 0) {
+    const sorted = [...curTxs].sort((a,b)=>b.value - a.value);
+    const highest = sorted[0];
+    const lowest = sorted[sorted.length-1];
+    
+    const hVal = document.getElementById('analysisHighestVal');
+    const hName = document.getElementById('analysisHighestName');
+    if(hVal) hVal.innerHTML = pv(formatBRL(highest.value));
+    if(hName) hName.textContent = highest.desc || highest.category;
+
+    const lVal = document.getElementById('analysisLowestVal');
+    const lName = document.getElementById('analysisLowestName');
+    if(lVal) lVal.innerHTML = pv(formatBRL(lowest.value));
+    if(lName) lName.textContent = lowest.desc || lowest.category;
+  } else {
+    ['analysisHighestVal','analysisLowestVal'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = 'R$ 0,00'; });
+    ['analysisHighestName','analysisLowestName'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = '-'; });
+  }
+
+  renderAnalysisChartWithCurrent();
+}
+
+function renderAnalysisChartWithCurrent() {
+  const canvas = document.getElementById('analysisChartCat');
+  if(!canvas) return;
+  const ctx = canvas.getContext('2d');
+  if(analysisChart) analysisChart.destroy();
+
+  const typeSelect = document.getElementById('analysisChartType');
+  const chartType = typeSelect ? typeSelect.value : 'doughnut';
+
+  const curTxs = TRANSACTIONS.filter(t => t.type === selectedAnalysisPeriod && new Date(t.date+'T12:00').getMonth()===currentMonth && new Date(t.date+'T12:00').getFullYear()===currentYear);
+  const map = {};
+  curTxs.forEach(t => { map[t.category] = (map[t.category]||0) + t.value; });
+
+  const labels = [], data = [], bg = [];
+  Object.keys(map).sort((a,b)=>map[b]-map[a]).forEach(cId => {
+    const info = getCatInfo(selectedAnalysisPeriod, cId);
+    labels.push(info.label); data.push(map[cId]); bg.push(info.color);
+  });
+
+  analysisChart = new Chart(ctx, {
+    type: chartType === 'line' ? 'line' : chartType === 'bar' ? 'bar' : chartType,
+    data: {
+      labels,
+      datasets: [{
+        label: 'Valor',
+        data,
+        backgroundColor: bg,
+        borderColor: bg,
+        borderWidth: 0,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'right', labels: { color: '#a1a1aa' } },
+        tooltip: { callbacks: { label: c => privacyMode ? ' R$ *******' : ` ${c.label}: ${formatBRL(c.raw)}` } }
+      }
+    }
+  });
+}
+
+function handleAnalysisMonthChange() {
+  const sel = document.getElementById('analysisCompareMonth');
+  const picker = document.getElementById('analysisCustomMonthPicker');
+  if(!sel || !picker) return;
+  if(sel.value === 'custom') {
+    picker.style.display = 'inline-block';
+    picker.innerHTML = MONTHS.map((m,i)=>`<option value="${i}">${m} ${currentYear}</option>`).join('');
+  } else {
+    picker.style.display = 'none';
+  }
+  renderAnalysisView();
+}
+
+function saveGeminiApiKey() {
+  const input = document.getElementById('geminiApiKeyInput');
+  if(input) {
+    geminiApiKey = input.value.trim();
+    localStorage.setItem('acefer_gemini_api_key', geminiApiKey);
+    alert('Chave de API do Gemini salva com sucesso!');
+  }
+}
+
+function toggleAuraChat() {
+  const card = document.getElementById('auraChatCard');
+  if(card) {
+    card.style.display = card.style.display === 'flex' ? 'none' : 'flex';
+  }
+}
+
+async function sendAuraMessage() {
+  const input = document.getElementById('auraInput');
+  const msgBox = document.getElementById('auraChatMessages');
+  if(!input || !msgBox || !input.value.trim()) return;
+
+  const userText = input.value.trim();
+  input.value = '';
+  msgBox.innerHTML += `<div style="background:var(--accent); color:var(--accent-fg); padding:8px 12px; border-radius:var(--radius2); margin-left:auto; max-width:80%;">${userText}</div>`;
+  msgBox.scrollTop = msgBox.scrollHeight;
+
+  if(!geminiApiKey) {
+    setTimeout(() => {
+      msgBox.innerHTML += `<div style="background:var(--bg2); padding:8px 12px; border-radius:var(--radius2); border:1px solid var(--border); color:var(--text); max-width:90%;">Configure sua Chave de API do Google Gemini nas Configurações para conversar com a Aura com inteligência real! No momento, estou em modo simulador.</div>`;
+      msgBox.scrollTop = msgBox.scrollHeight;
+    }, 500);
+    return;
+  }
+
+  try {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${geminiApiKey}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [{
+          parts: [{ text: `Você é a Aura, uma consultora financeira pessoal de luxo, inteligente e direta. Aqui estão os dados financeiros do usuário: Transações: ${JSON.stringify(TRANSACTIONS)}. Responda de forma prestativa, elegante e em português à pergunta: ${userText}` }]
+        }]
+      })
+    });
+    const data = await response.json();
+    const reply = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Desculpe, não consegui processar sua solicitação no momento.';
+    msgBox.innerHTML += `<div style="background:var(--bg2); padding:8px 12px; border-radius:var(--radius2); border:1px solid var(--border); color:var(--text); max-width:90%;">${reply}</div>`;
+  } catch(err) {
+    msgBox.innerHTML += `<div style="background:var(--bg2); padding:8px 12px; border-radius:var(--radius2); border:1px solid var(--border); color:var(--red); max-width:90%;">Erro ao conectar com a API do Gemini. Verifique sua chave.</div>`;
+  }
+  msgBox.scrollTop = msgBox.scrollHeight;
+}
+
+function showPage(pageId, navItem) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const targetPage = document.getElementById('page-' + pageId);
+  if(targetPage) targetPage.classList.add('active');
+  
+  document.querySelectorAll('.nav-item, .sidebar-nav-item').forEach(b => b.classList.remove('active'));
+  if(navItem) {
+    navItem.classList.add('active');
+  } else {
+    const matchedNav = document.querySelector(`[data-page="${pageId}"]`);
+    if(matchedNav) matchedNav.classList.add('active');
+  }
+
+  if(pageId === 'analysis') renderAnalysisView();
+  if(pageId === 'graphics') renderGraphicsView();
+  if(pageId === 'savings') renderSavingsView();
+}
+
+window.onload = function() {
+  Object.keys(collapsedSections).forEach(id => {
+    if(collapsedSections[id]) {
+      const el = document.getElementById(id);
+      if(el) el.classList.add('collapsed');
+    }
+  });
+
+  const keyInput = document.getElementById('geminiApiKeyInput');
+  if (keyInput && geminiApiKey) keyInput.value = geminiApiKey;
+
+  renderApp();
+};
+</script>
+</body>
+</html>
